@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import * as XLSX from 'xlsx';
+import Navbar from '../components/Navbar';
 
 export default function ReportsPage() {
   const router = useRouter();
@@ -138,21 +139,17 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      
+      <div className="max-w-7xl mx-auto p-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
+          <div className="mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Reports</h1>
               <p className="text-gray-600 mt-1">Download Excel reports for all system data</p>
             </div>
-            <button
-              onClick={() => router.push('/')}
-              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
-            >
-              Back to Home
-            </button>
           </div>
         </div>
 

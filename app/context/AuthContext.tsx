@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!loading && !user && !isPublicPage) {
       router.push("/login");
     }
-    // Redirect to home if authenticated and on login page
+    // Redirect to home (dashboard) if authenticated and on login page
     if (!loading && user && pathname === "/login") {
       router.push("/");
     }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
+import Navbar from '../components/Navbar';
 
 interface ActivityLog {
   logId: number;
@@ -98,21 +99,17 @@ export default function LogsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      
+      <div className="max-w-7xl mx-auto p-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
+          <div className="mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Activity Logs</h1>
               <p className="text-gray-600 mt-1">System audit trail and activity history</p>
             </div>
-            <button
-              onClick={() => router.push('/')}
-              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
-            >
-              Back to Home
-            </button>
           </div>
 
           {/* Filters */}

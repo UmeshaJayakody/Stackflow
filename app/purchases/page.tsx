@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
+import Navbar from '../components/Navbar';
 
 interface Supplier {
   supplierId: number;
@@ -175,6 +176,8 @@ export default function PurchasesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-6">
           <div className="flex justify-between items-center">
@@ -183,12 +186,6 @@ export default function PurchasesPage() {
               <p className="text-gray-600 mt-1">Record and track product purchases</p>
             </div>
             <div className="flex gap-3">
-              <Link
-                href="/"
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-              >
-                ← Home
-              </Link>
               <button
                 onClick={() => setShowModal(true)}
                 className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium"
