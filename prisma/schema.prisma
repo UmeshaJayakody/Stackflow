@@ -1,0 +1,198 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========================
+// 1. USERS TABLE
+// ========================
+model User {
+  userId       Int              @id @default(autoincrement()) @map("user_id")
+  fullName     String           @map("full_name") @db.VarChar(150)
+  email        String           @unique @db.VarChar(150)
+  passwordHash String           @map("password_hash") @db.Text
+  role         String           @default("staff") @db.VarChar(50)
+  createdAt    DateTime         @default(now()) @map("created_at")
+  
+  createdProducts Product[]        @relation("ProductCreator")
+  purchases       Purchase[]
+  sales           Sale[]
+  stockMovements  StockMovement[]
+  activityLogs    ActivityLog[]
+
+  @@map("users")
+}
+
+// ========================
+// 2. WAREHOUSES TABLE
+// ========================
+model Warehouse {
+  warehouseId   Int       @id @default(autoincrement()) @map("warehouse_id")
+  warehouseName String    @map("warehouse_name") @db.VarChar(150)
+  location      String?   @db.Text
+  
+  products Product[]
+
+  @@map("warehouses")
+}
+
+// ========================
+// 3. SUPPLIERS TABLE
+// ========================
+model Supplier {
+  supplierId    Int        @id @default(autoincrement()) @map("supplier_id")
+  supplierName  String     @map("supplier_name") @db.VarChar(150)
+  contactPerson String?    @map("contact_person") @db.VarChar(150)
+  phone         String?    @db.VarChar(50)
+  email         String?    @db.VarChar(150)
+  address       String?    @db.Text
+  
+  products  Product[]
+  purchases Purchase[]
+
+  @@map("suppliers")
+}
+
+// ========================
+// 4. CUSTOMERS TABLE
+// ========================
+model Customer {
+  customerId   Int     @id @default(autoincrement()) @map("customer_id")
+  customerName String  @map("customer_name") @db.VarChar(150)
+  phone        String? @db.VarChar(50)
+  email        String? @db.VarChar(150)
+  address      String? @db.Text
+  
+  sales Sale[]
+
+  @@map("customers")
+}
+
+// ========================
+// 5. PRODUCTS TABLE (Stock Included)
+// ========================
+model Product {
+  productId       Int       @id @default(autoincrement()) @map("product_id")
+  productName     String    @map("product_name") @db.VarChar(150)
+  sku             String    @unique @db.VarChar(100)
+  category        String?   @db.VarChar(100)
+  unitPrice       Decimal   @map("unit_price") @db.Decimal(10, 2)
+  quantity        Int       @default(0)
+  minimumQuantity Int       @default(0) @map("minimum_quantity")
+  maximumQuantity Int       @default(0) @map("maximum_quantity")
+  warehouseId     Int?      @map("warehouse_id")
+  supplierId      Int?      @map("supplier_id")
+  createdBy       Int?      @map("created_by")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  
+  warehouse       Warehouse?      @relation(fields: [warehouseId], references: [warehouseId], onDelete: SetNull)
+  supplier        Supplier?       @relation(fields: [supplierId], references: [supplierId], onDelete: SetNull)
+  creator         User?           @relation("ProductCreator", fields: [createdBy], references: [userId], onDelete: SetNull)
+  purchases       Purchase[]
+  sales           Sale[]
+  stockMovements  StockMovement[]
+  stockBatches    StockBatch[]
+
+  @@map("products")
+}
+
+// ========================
+// 6. PURCHASES TABLE
+// ========================
+model Purchase {
+  purchaseId        Int      @id @default(autoincrement()) @map("purchase_id")
+  supplierId        Int      @map("supplier_id")
+  productId         Int      @map("product_id")
+  purchasedQuantity Int      @map("purchased_quantity")
+  purchasePrice     Decimal  @map("purchase_price") @db.Decimal(10, 2)
+  purchaseDate      DateTime @default(now()) @map("purchase_date")
+  createdBy         Int?     @map("created_by")
+  
+  supplier     Supplier     @relation(fields: [supplierId], references: [supplierId], onDelete: Restrict)
+  product      Product      @relation(fields: [productId], references: [productId], onDelete: Cascade)
+  user         User?        @relation(fields: [createdBy], references: [userId], onDelete: SetNull)
+  stockBatches StockBatch[]
+
+  @@map("purchases")
+}
+
+// ========================
+// 7. SALES TABLE
+// ========================
+model Sale {
+  saleId          Int      @id @default(autoincrement()) @map("sale_id")
+  customerId      Int      @map("customer_id")
+  productId       Int      @map("product_id")
+  soldQuantity    Int      @map("sold_quantity")
+  salePrice       Decimal  @map("sale_price") @db.Decimal(10, 2)
+  costOfGoodsSold Decimal? @map("cost_of_goods_sold") @db.Decimal(10, 2)
+  saleDate        DateTime @default(now()) @map("sale_date")
+  createdBy       Int?     @map("created_by")
+  
+  customer Customer @relation(fields: [customerId], references: [customerId], onDelete: Restrict)
+  product  Product  @relation(fields: [productId], references: [productId], onDelete: Cascade)
+  user     User?    @relation(fields: [createdBy], references: [userId], onDelete: SetNull)
+
+  @@map("sales")
+}
+
+// ================================
+// 8. STOCK MOVEMENTS TABLE
+// ================================
+model StockMovement {
+  movementId Int      @id @default(autoincrement()) @map("movement_id")
+  productId  Int?     @map("product_id")
+  quantity   Int
+  type       String   @db.VarChar(10)
+  reference  String?  @db.VarChar(100)
+  userId     Int?     @map("user_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  
+  product Product? @relation(fields: [productId], references: [productId], onDelete: Cascade)
+  user    User?    @relation(fields: [userId], references: [userId], onDelete: SetNull)
+
+  @@map("stock_movements")
+}
+
+// ================================
+// 9. STOCK BATCHES TABLE (FIFO)
+// ================================
+model StockBatch {
+  batchId          Int      @id @default(autoincrement()) @map("batch_id")
+  productId        Int      @map("product_id")
+  purchaseId       Int      @map("purchase_id")
+  quantityIn       Int      @map("quantity_in")
+  quantityRemaining Int     @map("quantity_remaining")
+  purchasePrice    Decimal  @map("purchase_price") @db.Decimal(10, 2)
+  batchDate        DateTime @default(now()) @map("batch_date")
+  
+  product  Product  @relation(fields: [productId], references: [productId], onDelete: Cascade)
+  purchase Purchase @relation(fields: [purchaseId], references: [purchaseId], onDelete: Cascade)
+
+  @@map("stock_batches")
+}
+
+// ================================
+// 10. ACTIVITY LOGS TABLE
+// ================================
+model ActivityLog {
+  logId       Int      @id @default(autoincrement()) @map("log_id")
+  userId      Int?     @map("user_id")
+  action      String   @db.VarChar(50)  // CREATE, UPDATE, DELETE
+  entityType  String   @map("entity_type") @db.VarChar(50)  // PRODUCT, PURCHASE, SALE, SUPPLIER, CUSTOMER
+  entityId    Int?     @map("entity_id")
+  entityName  String?  @map("entity_name") @db.VarChar(255)
+  details     String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  user User? @relation(fields: [userId], references: [userId], onDelete: SetNull)
+
+  @@map("activity_logs")
+}
