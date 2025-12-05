@@ -178,7 +178,7 @@ export default function PurchasesPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <header className="bg-white shadow-sm">
+      <header className="bg-white shadow-sm pt-16">
         <div className="container mx-auto px-4 py-6">
           <div className="flex justify-between items-center">
             <div>

@@ -55,7 +55,7 @@ export default function Home() {
       <Navbar />
 
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-white shadow-sm pt-16">
         <div className="container mx-auto px-4 py-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>

@@ -142,7 +142,7 @@ export default function ReportsPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <div className="max-w-7xl mx-auto p-8">
+      <div className="max-w-7xl mx-auto p-8 pt-24">
         {/* Header */}
         <div className="mb-8">
           <div className="mb-4">
