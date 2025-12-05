@@ -30,39 +30,113 @@ export async function sendPasswordResetEmail(
   const mailOptions = {
     from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
     to: email,
-    subject: 'Password Reset Request - StackFlow Inventory',
+    subject: 'Password Reset Request - StackFlow',
     html: `
       <!DOCTYPE html>
       <html>
         <head>
           <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background-color: #4F46E5; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
-            .content { background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px; }
-            .button { display: inline-block; padding: 12px 30px; background-color: #4F46E5; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-            .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+              line-height: 1.6; 
+              color: #111827; 
+              background-color: #ffffff;
+              margin: 0;
+              padding: 0;
+            }
+            .container { 
+              max-width: 600px; 
+              margin: 0 auto; 
+              padding: 20px; 
+              background-color: #ffffff;
+              border-radius: 12px;
+              box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+              overflow: hidden;
+            }
+            .header { 
+              background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+              padding: 30px 20px; 
+              text-align: center; 
+              border-bottom: 1px solid #e5e7eb;
+            }
+            .logo {
+              font-size: 24px;
+              font-weight: bold;
+              color: #111827;
+              margin-bottom: 10px;
+            }
+            .content { 
+              padding: 40px 30px; 
+              background-color: rgba(255, 255, 255, 0.8);
+              backdrop-filter: blur(10px);
+              border-radius: 8px;
+              margin: 20px;
+            }
+            .button { 
+              display: inline-block; 
+              padding: 14px 32px; 
+              background-color: #111827; 
+              color: white !important; 
+              text-decoration: none; 
+              border-radius: 8px; 
+              margin: 24px 0; 
+              font-weight: 600;
+              box-shadow: 0 4px 12px rgba(17, 24, 39, 0.3);
+              transition: all 0.2s ease;
+            }
+            .button:hover { 
+              background-color: #374151;
+              box-shadow: 0 6px 16px rgba(17, 24, 39, 0.4);
+            }
+            .link-box {
+              background-color: #f3f4f6;
+              padding: 16px;
+              border-radius: 6px;
+              border: 1px solid #e5e7eb;
+              word-break: break-all;
+              font-family: monospace;
+              font-size: 14px;
+              color: #374151;
+            }
+            .warning {
+              background-color: #fef3c7;
+              border: 1px solid #f59e0b;
+              color: #92400e;
+              padding: 12px;
+              border-radius: 6px;
+              margin: 20px 0;
+            }
+            .footer { 
+              text-align: center; 
+              margin-top: 30px; 
+              color: #6b7280; 
+              font-size: 12px; 
+              padding: 20px;
+              border-top: 1px solid #e5e7eb;
+            }
+            .greeting { color: #111827; font-weight: 600; }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
-              <h1>Password Reset Request</h1>
+              <div class="logo">StackFlow</div>
+              <h1 style="color: #111827; margin: 0; font-size: 28px; font-weight: 700;">Password Reset Request</h1>
             </div>
             <div class="content">
-              <p>Hello ${fullName},</p>
-              <p>We received a request to reset your password for your StackFlow Inventory account.</p>
-              <p>Click the button below to reset your password:</p>
+              <p class="greeting">Hello ${fullName},</p>
+              <p style="color: #374151;">We received a request to reset your password for your StackFlow account.</p>
+              <p style="color: #374151;">Click the button below to reset your password:</p>
               <p style="text-align: center;">
                 <a href="${resetUrl}" class="button">Reset Password</a>
               </p>
-              <p>Or copy and paste this link into your browser:</p>
-              <p style="word-break: break-all; background-color: #e5e5e5; padding: 10px; border-radius: 3px;">
-                ${resetUrl}
-              </p>
-              <p><strong>This link will expire in 1 hour.</strong></p>
-              <p>If you didn't request a password reset, please ignore this email or contact support if you have concerns.</p>
-              <p>Best regards,<br>StackFlow Inventory Team</p>
+              <p style="color: #374151;">Or copy and paste this link into your browser:</p>
+              <div class="link-box">${resetUrl}</div>
+              <div class="warning">
+                <strong>This link will expire in 1 hour.</strong>
+              </div>
+              <p style="color: #374151;">If you didn't request a password reset, please ignore this email or contact support if you have concerns.</p>
+              <p style="color: #111827;">Best regards,<br><strong>StackFlow Team</strong></p>
             </div>
             <div class="footer">
               <p>This is an automated email. Please do not reply to this message.</p>
@@ -74,7 +148,7 @@ export async function sendPasswordResetEmail(
     text: `
 Hello ${fullName},
 
-We received a request to reset your password for your StackFlow Inventory account.
+We received a request to reset your password for your StackFlow account.
 
 Click the link below to reset your password:
 ${resetUrl}
@@ -84,7 +158,7 @@ This link will expire in 1 hour.
 If you didn't request a password reset, please ignore this email or contact support if you have concerns.
 
 Best regards,
-StackFlow Inventory Team
+StackFlow Team
     `,
   };
 
