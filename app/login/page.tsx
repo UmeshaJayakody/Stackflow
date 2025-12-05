@@ -115,7 +115,7 @@ export default function Login() {
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-600">
-          <p>Contact your administrator for account access</p>
+          <p>This is Not a public Website only Admin authorize persons only can access this website.Contact your administrator for account access</p>
         </div>
       </div>
     </div>
