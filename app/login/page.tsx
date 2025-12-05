@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
@@ -93,6 +94,16 @@ export default function Login() {
               {error}
             </div>
           )}
+
+          <div className="flex items-center justify-between mb-4">
+            <div></div>
+            <Link
+              href="/forgot-password"
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            >
+              Forgot Password?
+            </Link>
+          </div>
 
           <button
             type="submit"

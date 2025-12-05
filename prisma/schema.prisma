@@ -14,12 +14,14 @@ datasource db {
 // 1. USERS TABLE
 // ========================
 model User {
-  userId       Int              @id @default(autoincrement()) @map("user_id")
-  fullName     String           @map("full_name") @db.VarChar(150)
-  email        String           @unique @db.VarChar(150)
-  passwordHash String           @map("password_hash") @db.Text
-  role         String           @default("staff") @db.VarChar(50)
-  createdAt    DateTime         @default(now()) @map("created_at")
+  userId              Int              @id @default(autoincrement()) @map("user_id")
+  fullName            String           @map("full_name") @db.VarChar(150)
+  email               String           @unique @db.VarChar(150)
+  passwordHash        String           @map("password_hash") @db.Text
+  role                String           @default("staff") @db.VarChar(50)
+  createdAt           DateTime         @default(now()) @map("created_at")
+  resetToken          String?          @map("reset_token") @db.Text
+  resetTokenExpiry    DateTime?        @map("reset_token_expiry")
   
   createdProducts Product[]        @relation("ProductCreator")
   purchases       Purchase[]
