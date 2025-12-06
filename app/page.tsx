@@ -6,6 +6,7 @@ import Navbar from './components/Navbar';
 import FeaturedCrmDemoSection from './components/ui/featured-crm-demo-section';
 import ProductStockTrend from './components/ui/product-stock-trend';
 import DailyProfitLossBar from './components/ui/daily-profit-loss-bar';
+import Footer from './components/Footer';
 
 interface DashboardStats {
   totalProducts: number;
@@ -44,9 +45,15 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="relative">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-gray-900 mx-auto"></div>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/50 to-transparent blur-xl"></div>
+          </div>
+          <p className="mt-6 text-gray-600 font-medium">Loading dashboard...</p>
+        </div>
+      </div>
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-gray-900 mx-auto"></div>
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/50 to-transparent blur-xl"></div>
           </div>
@@ -60,24 +67,9 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
       <Navbar />
 
-      {/* Header with Glass Effect */}
-      <header className="bg-white/60 backdrop-blur-lg border-b border-gray-200/50 shadow-sm pt-16">
-        <div className="container mx-auto px-4 py-8">
-          <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-gray-200/50 to-gray-100/50 rounded-lg blur opacity-25"></div>
-            <div className="relative">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                Dashboard
-              </h1>
-              <p className="text-gray-600 mt-2 text-lg">Overview of your inventory performance</p>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-6 md:px-8 lg:px-12 py-8 pt-20">
         {/* Featured CRM Demo Section */}
-        <div className="mb-12">
+        <div className="mb-8">
           <FeaturedCrmDemoSection stats={{
             totalProducts: stats?.totalProducts || 0,
             totalInventoryValue: stats?.totalInventoryValue || '0.00',
@@ -86,92 +78,130 @@ export default function Home() {
           }} />
         </div>
 
-        {/* Product Stock Trend Graph */}
-        <div className="mb-8">
-          <ProductStockTrend />
-        </div>
-
         {/* Daily Profit & Loss Bar Graph */}
         <div className="mb-8">
           <DailyProfitLossBar />
         </div>
 
+        {/* Product Stock Trend Graph */}
+        <div className="mb-8">
+          <ProductStockTrend />
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Products by Warehouse with Glass Effect */}
-          <div className="relative bg-white/40 backdrop-blur-md border border-gray-200/50 rounded-2xl shadow-xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent"></div>
-            <div className="relative px-6 py-4 border-b border-gray-200/30">
-              <h2 className="text-lg font-semibold text-gray-900">Products by Warehouse</h2>
+          {/* Products by Warehouse with Enhanced Glass Effect */}
+          <div className="relative bg-white/40 backdrop-blur-md border border-gray-200/50 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-purple-50/20 to-transparent"></div>
+            <div className="relative px-6 py-4 border-b border-gray-200/30 bg-gradient-to-r from-blue-500/5 to-purple-500/5">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-blue-500/10 rounded-lg">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <h2 className="text-lg font-semibold text-gray-900">Products by Warehouse</h2>
+              </div>
             </div>
             <div className="relative p-6">
               {stats?.productsByWarehouse && stats.productsByWarehouse.length > 0 ? (
                 <div className="space-y-3">
-                  {stats.productsByWarehouse.map((warehouse: any) => (
-                    <div key={warehouse.warehouseId} className="group flex items-center justify-between p-4 bg-white/50 hover:bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200/30 transition-all duration-300 hover:shadow-md">
-                      <span className="font-medium text-gray-900">{warehouse.warehouseName}</span>
-                      <span className="px-3 py-1 bg-gradient-to-r from-blue-100 to-blue-50 text-blue-800 rounded-full text-sm font-semibold shadow-sm">
-                        {warehouse._count.products} products
-                      </span>
-                    </div>
+                  {stats.productsByWarehouse.map((warehouse: any, idx: number) => (
+                    <Link key={warehouse.warehouseId} href="/products" className="group relative overflow-hidden block cursor-pointer">
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-400/0 via-blue-400/5 to-blue-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="relative flex items-center justify-between p-4 bg-white/50 hover:bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/30 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                            {idx + 1}
+                          </div>
+                          <span className="font-semibold text-gray-900">{warehouse.warehouseName}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-bold shadow-md group-hover:shadow-lg transition-shadow">
+                            {warehouse._count.products}
+                          </div>
+                          <span className="text-xs text-gray-600 font-medium">items</span>
+                        </div>
+                      </div>
+                    </Link>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-center py-4 font-medium">No warehouses found</p>
+                <p className="text-gray-500 text-center py-8 font-medium">No warehouses found</p>
               )}
             </div>
           </div>
 
-          {/* Low Stock Products with Glass Effect */}
-          <div className="relative bg-white/40 backdrop-blur-md border border-gray-200/50 rounded-2xl shadow-xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-red-50/30 to-transparent"></div>
-            <div className="relative px-6 py-4 border-b border-gray-200/30">
-              <h2 className="text-lg font-semibold text-gray-900">Low Stock Alert</h2>
-              <p className="text-xs text-gray-500 mt-1">Items at or below min + 10% of stock range</p>
+          {/* Low Stock Alert with Enhanced UI */}
+          <div className="relative bg-white/40 backdrop-blur-md border border-red-200/50 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-50/40 via-orange-50/20 to-transparent"></div>
+            <div className="relative px-6 py-4 border-b border-red-200/30 bg-gradient-to-r from-red-500/5 to-orange-500/5">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-red-500/10 rounded-lg animate-pulse">
+                  <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">Low Stock Alert</h2>
+                  <p className="text-xs text-gray-500">Critical inventory levels</p>
+                </div>
+              </div>
             </div>
             <div className="relative p-6">
               {stats?.lowStockProducts && stats.lowStockProducts.length > 0 ? (
-                <div className="space-y-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
                   {stats.lowStockProducts.map((product: any) => (
-                    <div key={product.productId} className="group flex items-center justify-between p-4 bg-red-50/60 hover:bg-red-50/80 backdrop-blur-sm rounded-xl border border-red-200/50 transition-all duration-300 hover:shadow-md">
-                      <div>
-                        <p className="font-medium text-gray-900">{product.productName}</p>
-                        <p className="text-sm text-gray-600">SKU: {product.sku}</p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Min: {product.minimumQuantity} | Max: {product.maximumQuantity}
-                        </p>
+                    <Link key={product.productId} href={`/products/${product.productId}`} className="group relative overflow-hidden block cursor-pointer">
+                      <div className="absolute inset-0 bg-gradient-to-r from-red-400/0 via-red-400/5 to-red-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="relative flex items-center justify-between p-4 bg-gradient-to-r from-red-50/80 to-orange-50/60 hover:from-red-100/90 hover:to-orange-100/70 backdrop-blur-sm rounded-xl border border-red-200/50 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="p-2 bg-red-500/10 rounded-lg">
+                            <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-semibold text-gray-900">{product.productName}</p>
+                            <p className="text-xs text-gray-600 mt-0.5">SKU: {product.sku}</p>
+                            <div className="flex gap-3 mt-1 text-xs text-gray-500">
+                              <span className="flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                                Min: {product.minimumQuantity}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                                Max: {product.maximumQuantity}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          <div className="px-3 py-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg text-sm font-bold shadow-md animate-pulse">
+                            {product.quantity}
+                          </div>
+                          <span className="text-xs text-red-700 font-medium">remaining</span>
+                        </div>
                       </div>
-                      <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-sm font-semibold">
-                        {product.quantity} left
-                      </span>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-center py-4">All products have sufficient stock</p>
+                <div className="text-center py-8">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-3">
+                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-600 font-medium">All products have sufficient stock</p>
+                  <p className="text-sm text-gray-500 mt-1">Great job maintaining inventory levels!</p>
+                </div>
               )}
             </div>
           </div>
         </div>
-
-        {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-          <div className="flex flex-wrap gap-4">
-            <Link
-              href="/products"
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-            >
-              View All Products
-            </Link>
-            <Link
-              href="/products/new"
-              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-            >
-              Add New Product
-            </Link>
-          </div>
-        </div>
       </main>
+      
+      <Footer />
     </div>
   );
 }
