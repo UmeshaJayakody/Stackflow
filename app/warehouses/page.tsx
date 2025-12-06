@@ -1,0 +1,368 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+
+interface Warehouse {
+  warehouseId: number;
+  warehouseName: string;
+  location: string | null;
+  _count?: {
+    products: number;
+  };
+}
+
+export default function WarehousesPage() {
+  const { user } = useAuth();
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [editingWarehouse, setEditingWarehouse] = useState<Warehouse | null>(null);
+  const [formData, setFormData] = useState({
+    warehouseName: '',
+    location: '',
+  });
+
+  useEffect(() => {
+    fetchWarehouses();
+  }, []);
+
+  const fetchWarehouses = async () => {
+    try {
+      const response = await fetch('/api/warehouses');
+      const data = await response.json();
+      setWarehouses(data);
+    } catch (error) {
+      console.error('Error fetching warehouses:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const url = editingWarehouse 
+        ? `/api/warehouses/${editingWarehouse.warehouseId}`
+        : '/api/warehouses';
+      
+      const method = editingWarehouse ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': user?.userId.toString() || '',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        await fetchWarehouses();
+        setShowModal(false);
+        setEditingWarehouse(null);
+        setFormData({ warehouseName: '', location: '' });
+        alert(editingWarehouse ? 'Warehouse updated successfully!' : 'Warehouse created successfully!');
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to save warehouse');
+      }
+    } catch (error) {
+      console.error('Error saving warehouse:', error);
+      alert('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = (warehouse: Warehouse) => {
+    setEditingWarehouse(warehouse);
+    setFormData({
+      warehouseName: warehouse.warehouseName,
+      location: warehouse.location || '',
+    });
+    setShowModal(true);
+  };
+
+  const handleDelete = async (warehouseId: number) => {
+    if (!confirm('Are you sure you want to delete this warehouse? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/warehouses/${warehouseId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-user-id': user?.userId.toString() || '',
+        },
+      });
+
+      if (response.ok) {
+        await fetchWarehouses();
+        alert('Warehouse deleted successfully!');
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to delete warehouse');
+      }
+    } catch (error) {
+      console.error('Error deleting warehouse:', error);
+      alert('An error occurred. Please try again.');
+    }
+  };
+
+  const openAddModal = () => {
+    setEditingWarehouse(null);
+    setFormData({ warehouseName: '', location: '' });
+    setShowModal(true);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <Navbar />
+      
+      <header className="bg-white/40 backdrop-blur-md shadow-lg border-b border-gray-200/50 pt-16">
+        <div className="container mx-auto px-6 md:px-8 lg:px-12 py-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                Warehouse Management
+              </h1>
+              <p className="text-gray-600 mt-1">Manage your storage locations</p>
+            </div>
+            <button
+              onClick={openAddModal}
+              className="px-6 py-2.5 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg hover:from-gray-800 hover:to-gray-700 font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              + Add Warehouse
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-6 md:px-8 lg:px-12 py-8">
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6 transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-gray-600 uppercase tracking-wide">Total Warehouses</h3>
+                <p className="text-4xl font-bold text-gray-900 mt-3">{warehouses.length}</p>
+              </div>
+              <div className="bg-gradient-to-br from-gray-900 to-gray-700 p-4 rounded-xl">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6 transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-gray-600 uppercase tracking-wide">Total Products</h3>
+                <p className="text-4xl font-bold text-gray-900 mt-3">
+                  {warehouses.reduce((sum, w) => sum + (w._count?.products || 0), 0)}
+                </p>
+              </div>
+              <div className="bg-gradient-to-br from-gray-800 to-gray-600 p-4 rounded-xl">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6 transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-gray-600 uppercase tracking-wide">Avg Products/Warehouse</h3>
+                <p className="text-4xl font-bold text-gray-900 mt-3">
+                  {warehouses.length > 0
+                    ? Math.round(warehouses.reduce((sum, w) => sum + (w._count?.products || 0), 0) / warehouses.length)
+                    : 0}
+                </p>
+              </div>
+              <div className="bg-gradient-to-br from-black to-gray-800 p-4 rounded-xl">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Warehouses Grid */}
+        <div className="bg-white/60 backdrop-blur-md border border-gray-200/50 rounded-2xl shadow-2xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200/50 bg-gradient-to-r from-gray-900 to-gray-800">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              All Warehouses
+            </h2>
+          </div>
+          
+          {loading ? (
+            <div className="text-center py-12 bg-white/40">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-gray-900 mx-auto"></div>
+              <p className="mt-4 text-gray-900 font-semibold">Loading warehouses...</p>
+            </div>
+          ) : warehouses.length === 0 ? (
+            <div className="text-center py-12 bg-white/40">
+              <p className="text-gray-700 font-semibold">No warehouses found</p>
+              <button
+                onClick={openAddModal}
+                className="mt-4 px-6 py-2 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl hover:from-gray-800 hover:to-gray-700 font-semibold shadow-lg transition-all duration-300"
+              >
+                Add First Warehouse
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+              {warehouses.map((warehouse) => (
+                <div
+                  key={warehouse.warehouseId}
+                  className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border-2 border-gray-200/50 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                >
+                  <div className="bg-gradient-to-r from-gray-900 to-gray-800 px-4 py-3">
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                      {warehouse.warehouseName}
+                    </h3>
+                  </div>
+                  
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-start gap-2">
+                      <svg className="w-5 h-5 text-gray-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <div className="flex-1">
+                        <p className="text-xs font-bold text-gray-500 uppercase">Location</p>
+                        <p className="text-sm font-semibold text-gray-900">
+                          {warehouse.location || 'No location specified'}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
+                      <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                      </svg>
+                      <div className="flex-1">
+                        <p className="text-xs font-bold text-gray-500 uppercase">Products</p>
+                        <p className="text-2xl font-bold text-gray-900">
+                          {warehouse._count?.products || 0}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2 pt-3 border-t border-gray-200">
+                      <button
+                        onClick={() => handleEdit(warehouse)}
+                        className="flex-1 px-4 py-2 bg-gradient-to-r from-gray-700 to-gray-600 text-white rounded-xl hover:from-gray-600 hover:to-gray-500 font-bold text-sm shadow-lg transition-all duration-300"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(warehouse.warehouseId)}
+                        className="flex-1 px-4 py-2 bg-gradient-to-r from-gray-400 to-gray-300 text-gray-800 rounded-xl hover:from-gray-500 hover:to-gray-400 font-bold text-sm shadow-lg transition-all duration-300"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+
+      <Footer />
+
+      {/* Add/Edit Warehouse Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full border-2 border-gray-300/50">
+            <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white px-6 py-4 rounded-t-3xl border-b-2 border-gray-700">
+              <h2 className="text-2xl font-bold flex items-center gap-2">
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                {editingWarehouse ? 'Edit Warehouse' : 'Add New Warehouse'}
+              </h2>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="p-6">
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="warehouseName" className="block text-sm font-bold text-gray-700 mb-2">
+                    Warehouse Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="warehouseName"
+                    name="warehouseName"
+                    value={formData.warehouseName}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
+                    placeholder="e.g., Main Warehouse"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="location" className="block text-sm font-bold text-gray-700 mb-2">
+                    Location
+                  </label>
+                  <textarea
+                    id="location"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleChange}
+                    rows={3}
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
+                    placeholder="e.g., 123 Main St, City, Country"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:from-black hover:to-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed font-bold shadow-lg transition-all duration-300"
+                >
+                  {loading ? 'Saving...' : editingWarehouse ? 'Update Warehouse' : 'Add Warehouse'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowModal(false);
+                    setEditingWarehouse(null);
+                    setFormData({ warehouseName: '', location: '' });
+                  }}
+                  className="px-6 py-3 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 font-bold shadow-md transition-all duration-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

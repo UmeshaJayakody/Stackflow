@@ -1450,6 +1450,7 @@ export default function ProductsPage() {
                     value={newProductForm.warehouseId}
                     onChange={(e) => setNewProductForm({...newProductForm, warehouseId: e.target.value})}
                     required
+                    title="Select a warehouse"
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
                   >
                     <option value="">Select Warehouse</option>

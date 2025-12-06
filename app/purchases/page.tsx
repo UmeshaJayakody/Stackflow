@@ -201,38 +201,71 @@ export default function PurchasesPage() {
       <main className="container mx-auto px-6 md:px-8 lg:px-12 py-8">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white/60 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 p-6">
-            <h3 className="text-sm font-medium text-gray-600">Total Purchases</h3>
-            <p className="text-3xl font-bold text-gray-900 mt-2">{purchases.length}</p>
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6 transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-gray-600 uppercase tracking-wide">Total Purchases</h3>
+                <p className="text-4xl font-bold text-gray-900 mt-3">{purchases.length}</p>
+              </div>
+              <div className="bg-gradient-to-br from-gray-900 to-gray-700 p-4 rounded-xl">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+              </div>
+            </div>
           </div>
-          <div className="bg-white/60 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 p-6">
-            <h3 className="text-sm font-medium text-gray-600">Total Items Purchased</h3>
-            <p className="text-3xl font-bold text-gray-900 mt-2">
-              {purchases.reduce((sum, p) => sum + p.purchasedQuantity, 0)}
-            </p>
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6 transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-gray-600 uppercase tracking-wide">Items Purchased</h3>
+                <p className="text-4xl font-bold text-gray-900 mt-3">
+                  {purchases.reduce((sum, p) => sum + p.purchasedQuantity, 0)}
+                </p>
+              </div>
+              <div className="bg-gradient-to-br from-gray-800 to-gray-600 p-4 rounded-xl">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+            </div>
           </div>
-          <div className="bg-white/60 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 p-6">
-            <h3 className="text-sm font-medium text-gray-600">Total Value</h3>
-            <p className="text-3xl font-bold text-gray-900 mt-2">${getTotalValue().toFixed(2)}</p>
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6 transform hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-gray-600 uppercase tracking-wide">Total Value</h3>
+                <p className="text-4xl font-bold text-gray-900 mt-3">${getTotalValue().toFixed(2)}</p>
+              </div>
+              <div className="bg-gradient-to-br from-black to-gray-800 p-4 rounded-xl">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Purchases Table */}
-        <div className="bg-white/60 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden">{/**/}
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">Purchase History</h2>
+        <div className="bg-white/60 backdrop-blur-md border border-gray-200/50 rounded-2xl shadow-2xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200/50 bg-gradient-to-r from-gray-900 to-gray-800">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+              </svg>
+              Purchase History
+            </h2>
           </div>
           
           {loading ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500">Loading purchases...</p>
+            <div className="text-center py-12 bg-white/40">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-gray-900 mx-auto"></div>
+              <p className="mt-4 text-gray-900 font-semibold">Loading purchases...</p>
             </div>
           ) : purchases.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500">No purchases recorded yet</p>
+            <div className="text-center py-12 bg-white/40">
+              <p className="text-gray-700 font-semibold">No purchases recorded yet</p>
               <button
                 onClick={() => setShowModal(true)}
-                className="mt-4 px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium"
+                className="mt-4 px-6 py-2 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl hover:from-gray-800 hover:to-gray-700 font-semibold shadow-lg transition-all duration-300"
               >
                 Record First Purchase
               </button>
@@ -240,40 +273,40 @@ export default function PurchasesPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-900">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Product
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Supplier
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Quantity
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Unit Price
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Total
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                       Recorded By
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white/80 divide-y divide-gray-200">
                   {purchases.map((purchase) => (
-                    <tr key={purchase.purchaseId} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <tr key={purchase.purchaseId} className="hover:bg-gray-100/80 transition-all duration-200">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                         {new Date(purchase.purchaseDate).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{purchase.product.productName}</div>
-                        <div className="text-sm text-gray-500">{purchase.product.sku}</div>
+                        <div className="text-sm font-bold text-gray-900">{purchase.product.productName}</div>
+                        <div className="text-sm font-semibold text-gray-600">{purchase.product.sku}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {purchase.supplier.supplierName}
@@ -301,14 +334,21 @@ export default function PurchasesPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Record New Purchase</h2>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full border-2 border-gray-300/50">
+            <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white px-6 py-4 rounded-t-3xl border-b-2 border-gray-700">
+              <h2 className="text-2xl font-bold flex items-center gap-2">
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                Record New Purchase
+              </h2>
+            </div>
             
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="p-6">
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="supplierId" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="supplierId" className="block text-sm font-bold text-gray-700 mb-2">
                     Supplier *
                   </label>
                   <div className="flex gap-2">
@@ -318,7 +358,7 @@ export default function PurchasesPage() {
                       value={formData.supplierId}
                       onChange={handleChange}
                       required
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
                     >
                       <option value="">Select Supplier</option>
                       {suppliers.map((supplier) => (
@@ -330,16 +370,16 @@ export default function PurchasesPage() {
                     <button
                       type="button"
                       onClick={() => { setShowModal(false); setShowAddSupplierModal(true); }}
-                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium whitespace-nowrap"
+                      className="px-4 py-2 bg-gradient-to-r from-gray-700 to-gray-600 text-white rounded-xl hover:from-gray-600 hover:to-gray-500 font-bold whitespace-nowrap shadow-lg transition-all duration-300"
                       title="Add New Supplier"
                     >
-                      + Add New
+                      + Add
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="productId" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="productId" className="block text-sm font-bold text-gray-700 mb-2">
                     Product *
                   </label>
                   <select
@@ -348,7 +388,7 @@ export default function PurchasesPage() {
                     value={formData.productId}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
                   >
                     <option value="">Select Product</option>
                     {products.map((product) => (
@@ -360,7 +400,7 @@ export default function PurchasesPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="purchasedQuantity" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="purchasedQuantity" className="block text-sm font-bold text-gray-700 mb-2">
                     Quantity *
                   </label>
                   <input
@@ -371,12 +411,12 @@ export default function PurchasesPage() {
                     onChange={handleChange}
                     required
                     min="1"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="purchasePrice" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="purchasePrice" className="block text-sm font-bold text-gray-700 mb-2">
                     Unit Price ($) *
                   </label>
                   <input
@@ -388,7 +428,7 @@ export default function PurchasesPage() {
                     required
                     min="0"
                     step="0.01"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
                   />
                 </div>
               </div>
@@ -397,14 +437,14 @@ export default function PurchasesPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:from-black hover:to-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed font-bold shadow-lg transition-all duration-300"
                 >
                   {loading ? 'Recording...' : 'Record Purchase'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 font-medium"
+                  className="px-6 py-3 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 font-bold shadow-md transition-all duration-300"
                 >
                   Cancel
                 </button>
@@ -416,14 +456,21 @@ export default function PurchasesPage() {
 
       {/* Add Supplier Modal */}
       {showAddSupplierModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Add New Supplier</h2>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[60] p-4">
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full border-2 border-gray-300/50 max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white px-6 py-4 border-b-2 border-gray-700">
+              <h2 className="text-2xl font-bold flex items-center gap-2">
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                Add New Supplier
+              </h2>
+            </div>
             
-            <form onSubmit={handleAddSupplier}>
+            <form onSubmit={handleAddSupplier} className="p-6 overflow-y-auto" style={{maxHeight: 'calc(90vh - 120px)'}}>
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="supplierName" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="supplierName" className="block text-sm font-bold text-gray-700 mb-2">
                     Supplier Name *
                   </label>
                   <input
@@ -431,55 +478,55 @@ export default function PurchasesPage() {
                     id="supplierName"
                     name="supplierName"
                     required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="contactPerson" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="contactPerson" className="block text-sm font-bold text-gray-700 mb-2">
                     Contact Person
                   </label>
                   <input
                     type="text"
                     id="contactPerson"
                     name="contactPerson"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="phone" className="block text-sm font-bold text-gray-700 mb-2">
                     Phone
                   </label>
                   <input
                     type="tel"
                     id="phone"
                     name="phone"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-2">
                     Email
                   </label>
                   <input
                     type="email"
                     id="email"
                     name="email"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="address" className="block text-sm font-bold text-gray-700 mb-2">
                     Address
                   </label>
                   <textarea
                     id="address"
                     name="address"
                     rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
                   />
                 </div>
               </div>
@@ -487,14 +534,14 @@ export default function PurchasesPage() {
               <div className="flex gap-3 mt-6">
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium"
+                  className="flex-1 px-6 py-2 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:from-black hover:to-gray-900 font-bold shadow-lg transition-all duration-300"
                 >
                   Add Supplier
                 </button>
                 <button
                   type="button"
                   onClick={() => { setShowAddSupplierModal(false); setShowModal(true); }}
-                  className="flex-1 px-6 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 font-medium"
+                  className="flex-1 px-6 py-2 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 font-bold shadow-md transition-all duration-300"
                 >
                   Cancel
                 </button>
