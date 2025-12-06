@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 interface ActivityLog {
   logId: number;
@@ -99,21 +100,21 @@ export default function LogsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <Navbar />
       
-      <div className="max-w-7xl mx-auto p-8 pt-24">
+      <div className="max-w-7xl mx-auto px-6 md:px-8 lg:px-12 py-8 pt-24">
         {/* Header */}
         <div className="mb-8">
           <div className="mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Activity Logs</h1>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Activity Logs</h1>
               <p className="text-gray-600 mt-1">System audit trail and activity history</p>
             </div>
           </div>
 
           {/* Filters */}
-          <div className="bg-white p-4 rounded-lg shadow-md flex gap-4">
+          <div className="bg-white/60 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-gray-200/50 flex gap-4">
             <div className="flex-1">
               <label htmlFor="filterAction" className="block text-sm font-medium text-gray-700 mb-1">
                 Filter by Action
@@ -253,6 +254,8 @@ export default function LogsPage() {
           Showing {filteredLogs.length} of {logs.length} log entries
         </div>
       </div>
+      
+      <Footer />
     </div>
   );
 }

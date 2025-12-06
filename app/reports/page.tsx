@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import * as XLSX from 'xlsx';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 export default function ReportsPage() {
   const router = useRouter();
@@ -139,15 +140,15 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <Navbar />
       
-      <div className="max-w-7xl mx-auto p-8 pt-24">
+      <div className="max-w-7xl mx-auto px-6 md:px-8 lg:px-12 py-8 pt-24">
         {/* Header */}
         <div className="mb-8">
           <div className="mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Reports</h1>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Reports</h1>
               <p className="text-gray-600 mt-1">Download Excel reports for all system data</p>
             </div>
           </div>
@@ -160,10 +161,10 @@ export default function ReportsPage() {
             return (
               <div
                 key={report.reportType}
-                className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+                className="bg-white/60 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 p-6 hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]"
               >
                 <div className="flex items-center mb-4">
-                  <div className={`${colorClasses.bg} rounded-full p-3 mr-4 ${colorClasses.text}`}>
+                  <div className={`${colorClasses.bg} rounded-xl p-3 mr-4 ${colorClasses.text} shadow-lg`}>
                     {report.icon}
                   </div>
                   <h2 className="text-xl font-bold text-gray-800">{report.title}</h2>
@@ -171,7 +172,7 @@ export default function ReportsPage() {
                 <p className="text-gray-600 mb-6 text-sm">{report.description}</p>
                 <button
                   onClick={() => downloadReport(report.reportType, report.fileName)}
-                  className={`w-full ${colorClasses.bg} ${colorClasses.text} ${colorClasses.hover} font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center`}
+                  className="w-full bg-gradient-to-r from-gray-900 to-gray-800 text-white hover:from-gray-800 hover:to-gray-700 font-semibold py-3 px-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center"
                 >
                   <svg
                     className="w-5 h-5 mr-2"
@@ -194,7 +195,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Info Section */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <div className="mt-8 bg-blue-50/60 backdrop-blur-md border border-blue-200/50 rounded-2xl shadow-xl p-6">
           <div className="flex items-start">
             <svg
               className="w-6 h-6 text-blue-600 mr-3 mt-0.5"
@@ -221,6 +222,8 @@ export default function ReportsPage() {
           </div>
         </div>
       </div>
+      
+      <Footer />
     </div>
   );
 }

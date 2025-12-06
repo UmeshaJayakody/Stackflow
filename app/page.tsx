@@ -54,20 +54,14 @@ export default function Home() {
           <p className="mt-6 text-gray-600 font-medium">Loading dashboard...</p>
         </div>
       </div>
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-gray-900 mx-auto"></div>
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/50 to-transparent blur-xl"></div>
-          </div>
-          <p className="mt-6 text-gray-600 font-medium">Loading dashboard...</p>
-        </div>
-      </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
+    <div className="min-h-screen">
       <Navbar />
 
-      <main className="container mx-auto px-6 md:px-8 lg:px-12 py-8 pt-20">
+      <main className="container mx-auto px-6 md:px-8 lg:px-12 py-8 pt-20">{/**/}
         {/* Featured CRM Demo Section */}
         <div className="mb-8">
           <FeaturedCrmDemoSection stats={{

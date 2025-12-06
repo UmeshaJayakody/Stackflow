@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 interface Supplier {
   supplierId: number;
@@ -175,20 +176,20 @@ export default function PurchasesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <Navbar />
       
-      <header className="bg-white shadow-sm pt-16">
-        <div className="container mx-auto px-4 py-6">
+      <header className="bg-white/40 backdrop-blur-md shadow-lg border-b border-gray-200/50 pt-16">
+        <div className="container mx-auto px-6 md:px-8 lg:px-12 py-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Purchase Management</h1>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Purchase Management</h1>
               <p className="text-gray-600 mt-1">Record and track product purchases</p>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowModal(true)}
-                className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium"
+                className="px-6 py-2.5 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg hover:from-gray-800 hover:to-gray-700 font-medium shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 + New Purchase
               </button>
@@ -197,27 +198,27 @@ export default function PurchasesPage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-6 md:px-8 lg:px-12 py-8">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white/60 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 p-6">
             <h3 className="text-sm font-medium text-gray-600">Total Purchases</h3>
             <p className="text-3xl font-bold text-gray-900 mt-2">{purchases.length}</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white/60 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 p-6">
             <h3 className="text-sm font-medium text-gray-600">Total Items Purchased</h3>
             <p className="text-3xl font-bold text-gray-900 mt-2">
               {purchases.reduce((sum, p) => sum + p.purchasedQuantity, 0)}
             </p>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white/60 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 p-6">
             <h3 className="text-sm font-medium text-gray-600">Total Value</h3>
             <p className="text-3xl font-bold text-gray-900 mt-2">${getTotalValue().toFixed(2)}</p>
           </div>
         </div>
 
         {/* Purchases Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white/60 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden">{/**/}
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900">Purchase History</h2>
           </div>
@@ -502,6 +503,8 @@ export default function PurchasesPage() {
           </div>
         </div>
       )}
+      
+      <Footer />
     </div>
   );
 }
