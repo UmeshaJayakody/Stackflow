@@ -76,6 +76,20 @@ export default function ProductsPage() {
   const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
   const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [showEditProductModal, setShowEditProductModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [editProductForm, setEditProductForm] = useState({
+    productId: 0,
+    productName: '',
+    sku: '',
+    category: '',
+    unitPrice: '',
+    quantity: '0',
+    minimumQuantity: '0',
+    maximumQuantity: '0',
+    warehouseId: '',
+    supplierId: '',
+  });
   const [newProductForm, setNewProductForm] = useState({
     productName: '',
     sku: '',
@@ -245,6 +259,55 @@ export default function ProductsPage() {
     } catch (error) {
       console.error('Error recording purchase:', error);
       alert('An error occurred while recording purchase');
+    }
+  };
+
+  const handleEditProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`/api/products/${editProductForm.productId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productName: editProductForm.productName,
+          sku: editProductForm.sku,
+          category: editProductForm.category,
+          unitPrice: parseFloat(editProductForm.unitPrice),
+          quantity: parseInt(editProductForm.quantity),
+          minimumQuantity: parseInt(editProductForm.minimumQuantity),
+          maximumQuantity: parseInt(editProductForm.maximumQuantity),
+          warehouseId: parseInt(editProductForm.warehouseId),
+          supplierId: parseInt(editProductForm.supplierId),
+        }),
+      });
+
+      if (response.ok) {
+        alert('Product updated successfully');
+        setShowEditProductModal(false);
+        setEditProductForm({
+          productId: 0,
+          productName: '',
+          sku: '',
+          category: '',
+          unitPrice: '',
+          quantity: '0',
+          minimumQuantity: '0',
+          maximumQuantity: '0',
+          warehouseId: '',
+          supplierId: '',
+        });
+        fetchProducts();
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to update product');
+      }
+    } catch (error) {
+      console.error('Error updating product:', error);
+      alert('An error occurred while updating product');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -625,7 +688,7 @@ export default function ProductsPage() {
               >
                 <option value="">All Suppliers</option>
                 {suppliers.map((supplier) => (
-                  <option key={supplier.supplierId} value={supplier.supplierId}>
+                  <option key={supplier.supplierId} value={supplier.supplierId.toString()}>
                     {supplier.supplierName}
                   </option>
                 ))}
@@ -643,7 +706,7 @@ export default function ProductsPage() {
               >
                 <option value="">All Warehouses</option>
                 {warehouses.map((warehouse) => (
-                  <option key={warehouse.warehouseId} value={warehouse.warehouseId}>
+                  <option key={warehouse.warehouseId} value={warehouse.warehouseId.toString()}>
                     {warehouse.warehouseName}
                   </option>
                 ))}
@@ -764,7 +827,22 @@ export default function ProductsPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex gap-2">
                           <button
-                            onClick={(e) => { e.stopPropagation(); router.push(`/products/${product.productId}`); }}
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              setEditProductForm({
+                                productId: product.productId,
+                                productName: product.productName,
+                                sku: product.sku,
+                                category: product.category || '',
+                                unitPrice: product.unitPrice.toString(),
+                                quantity: product.quantity.toString(),
+                                minimumQuantity: product.minimumQuantity.toString(),
+                                maximumQuantity: product.maximumQuantity.toString(),
+                                warehouseId: product.warehouse?.warehouseId.toString() || '',
+                                supplierId: product.supplier?.supplierId.toString() || '',
+                              });
+                              setShowEditProductModal(true);
+                            }}
                             className="px-3 py-1.5 bg-gradient-to-r from-gray-700 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-500 font-semibold text-xs shadow-md transition-all duration-300"
                           >
                             Edit
@@ -806,7 +884,7 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            <div className="p-6 overflow-y-auto" style={{maxHeight: 'calc(90vh - 88px)'}}>
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-88px)]">
 
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
@@ -1183,7 +1261,7 @@ export default function ProductsPage() {
               <p className="text-gray-300 mt-1">Create a new supplier account</p>
             </div>
             
-            <form onSubmit={handleAddSupplier} className="p-6 overflow-y-auto" style={{maxHeight: 'calc(90vh - 120px)'}}>
+            <form onSubmit={handleAddSupplier} className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
               <div className="space-y-4">
                 <div>
                   <label htmlFor="supplierName" className="block text-sm font-bold text-gray-900 mb-2">
@@ -1281,7 +1359,7 @@ export default function ProductsPage() {
               <p className="text-gray-300 mt-1">Create a new customer account</p>
             </div>
             
-            <form onSubmit={handleAddCustomer} className="p-6 overflow-y-auto" style={{maxHeight: 'calc(90vh - 120px)'}}>
+            <form onSubmit={handleAddCustomer} className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
               <div className="space-y-4">
                 <div>
                   <label htmlFor="customerName" className="block text-sm font-bold text-gray-900 mb-2">
@@ -1466,6 +1544,7 @@ export default function ProductsPage() {
                     value={newProductForm.supplierId}
                     onChange={(e) => setNewProductForm({...newProductForm, supplierId: e.target.value})}
                     required
+                    title="Select a supplier"
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
                   >
                     <option value="">Select Supplier</option>
@@ -1526,6 +1605,178 @@ export default function ProductsPage() {
                   type="button"
                   onClick={() => setShowAddProductModal(false)}
                   className="px-6 py-3 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 font-semibold transition-all duration-300 shadow-md hover:shadow-lg"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Product Modal */}
+      {showEditProductModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden border-2 border-white/20 max-h-[calc(90vh-88px)]">
+            <div className="sticky top-0 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white p-6 flex justify-between items-center z-10">
+              <h2 className="text-2xl font-bold">Edit Product</h2>
+              <button
+                onClick={() => setShowEditProductModal(false)}
+                className="text-white/80 hover:text-white transition-colors"
+                aria-label="Close edit product modal"
+              >
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleEditProduct} className="p-6 overflow-y-auto max-h-[calc(90vh-176px)]">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Product Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={editProductForm.productName}
+                    onChange={(e) => setEditProductForm({...editProductForm, productName: e.target.value})}
+                    required
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    SKU *
+                  </label>
+                  <input
+                    type="text"
+                    value={editProductForm.sku}
+                    onChange={(e) => setEditProductForm({...editProductForm, sku: e.target.value})}
+                    required
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Category *
+                  </label>
+                  <input
+                    type="text"
+                    value={editProductForm.category}
+                    onChange={(e) => setEditProductForm({...editProductForm, category: e.target.value})}
+                    required
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Unit Price *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={editProductForm.unitPrice}
+                    onChange={(e) => setEditProductForm({...editProductForm, unitPrice: e.target.value})}
+                    required
+                    min="0"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Warehouse *
+                  </label>
+                  <select
+                    value={editProductForm.warehouseId}
+                    onChange={(e) => setEditProductForm({...editProductForm, warehouseId: e.target.value})}
+                    required
+                    title="Select a warehouse"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                  >
+                    <option value="">Select Warehouse</option>
+                    {warehouses.map((w) => (
+                      <option key={w.warehouseId} value={w.warehouseId}>{w.warehouseName}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Supplier *
+                  </label>
+                  <select
+                    value={editProductForm.supplierId}
+                    onChange={(e) => setEditProductForm({...editProductForm, supplierId: e.target.value})}
+                    required
+                    title="Select a supplier"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                  >
+                    <option value="">Select Supplier</option>
+                    {suppliers.map((s) => (
+                      <option key={s.supplierId} value={s.supplierId}>{s.supplierName}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Current Quantity
+                  </label>
+                  <input
+                    type="number"
+                    value={editProductForm.quantity}
+                    onChange={(e) => setEditProductForm({...editProductForm, quantity: e.target.value})}
+                    min="0"
+                    placeholder="0"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Minimum Quantity
+                  </label>
+                  <input
+                    type="number"
+                    value={editProductForm.minimumQuantity}
+                    onChange={(e) => setEditProductForm({...editProductForm, minimumQuantity: e.target.value})}
+                    min="0"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Maximum Quantity
+                  </label>
+                  <input
+                    type="number"
+                    value={editProductForm.maximumQuantity}
+                    onChange={(e) => setEditProductForm({...editProductForm, maximumQuantity: e.target.value})}
+                    min="0"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-4 mt-6 pt-6 border-t border-gray-200">
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:from-black hover:to-gray-900 font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? <LoadingDots /> : 'Update Product'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowEditProductModal(false)}
+                  disabled={isLoading}
+                  className="px-6 py-3 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 font-semibold transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>

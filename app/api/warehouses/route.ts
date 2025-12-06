@@ -18,11 +18,14 @@ export async function GET() {
       }
     });
 
-    return NextResponse.json(warehouses);
+    return NextResponse.json({
+      success: true,
+      data: warehouses
+    });
   } catch (error: any) {
     console.error('Error fetching warehouses:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch warehouses', message: error.message },
+      { success: false, error: 'Failed to fetch warehouses', message: error.message },
       { status: 500 }
     );
   }
