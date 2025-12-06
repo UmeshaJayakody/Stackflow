@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Navbar from './components/Navbar';
 import FeaturedCrmDemoSection from './components/ui/featured-crm-demo-section';
 import ProductStockTrend from './components/ui/product-stock-trend';
 import DailyProfitLossBar from './components/ui/daily-profit-loss-bar';
-import Footer from './components/Footer';
+import LoadingDots from './components/LoadingDots';
 
 interface DashboardStats {
   totalProducts: number;
@@ -46,21 +45,13 @@ export default function Home() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-gray-900 mx-auto"></div>
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/50 to-transparent blur-xl"></div>
-          </div>
-          <p className="mt-6 text-gray-600 font-medium">Loading dashboard...</p>
-        </div>
+        <LoadingDots />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen">
-      <Navbar />
-
       <main className="container mx-auto px-6 md:px-8 lg:px-12 py-8 pt-20">{/**/}
         {/* Featured CRM Demo Section */}
         <div className="mb-8">
@@ -207,8 +198,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-      
-      <Footer />
     </div>
   );
 }

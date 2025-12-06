@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 
 interface ActivityLog {
   logId: number;
@@ -101,8 +99,6 @@ export default function LogsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Navbar />
-      
       <header className="bg-white/40 backdrop-blur-md shadow-lg border-b border-gray-200/50 pt-16">
         <div className="container mx-auto px-6 md:px-8 lg:px-12 py-6">
           <div className="flex justify-between items-center">
@@ -330,8 +326,6 @@ export default function LogsPage() {
           </p>
         </div>
       </main>
-      
-      <Footer />
     </div>
   );
 }

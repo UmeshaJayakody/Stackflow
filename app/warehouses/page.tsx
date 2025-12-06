@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
+import LoadingDots from '../components/LoadingDots';
 
 interface Warehouse {
   warehouseId: number;
@@ -129,8 +128,6 @@ export default function WarehousesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Navbar />
-      
       <header className="bg-white/40 backdrop-blur-md shadow-lg border-b border-gray-200/50 pt-16">
         <div className="container mx-auto px-6 md:px-8 lg:px-12 py-6">
           <div className="flex justify-between items-center">
@@ -213,8 +210,7 @@ export default function WarehousesPage() {
           
           {loading ? (
             <div className="text-center py-12 bg-white/40">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-gray-900 mx-auto"></div>
-              <p className="mt-4 text-gray-900 font-semibold">Loading warehouses...</p>
+              <LoadingDots />
             </div>
           ) : warehouses.length === 0 ? (
             <div className="text-center py-12 bg-white/40">
@@ -290,8 +286,6 @@ export default function WarehousesPage() {
         </div>
       </main>
 
-      <Footer />
-
       {/* Add/Edit Warehouse Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
@@ -343,9 +337,9 @@ export default function WarehousesPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:from-black hover:to-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed font-bold shadow-lg transition-all duration-300"
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:from-black hover:to-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed font-bold shadow-lg transition-all duration-300 flex items-center justify-center"
                 >
-                  {loading ? 'Saving...' : editingWarehouse ? 'Update Warehouse' : 'Add Warehouse'}
+                  {loading ? <LoadingDots /> : editingWarehouse ? 'Update Warehouse' : 'Add Warehouse'}
                 </button>
                 <button
                   type="button"

@@ -4,8 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
+import LoadingDots from '../components/LoadingDots';
 
 interface Product {
   productId: number;
@@ -560,8 +559,6 @@ export default function ProductsPage() {
 
   return (
     <div className="min-h-screen">
-      <Navbar />
-      
       {/* Header */}
       <header className="bg-white/40 backdrop-blur-md shadow-lg border-b border-gray-200/50 pt-16">
         <div className="container mx-auto px-6 md:px-8 lg:px-12 py-6">
@@ -668,8 +665,7 @@ export default function ProductsPage() {
           
           {loading ? (
             <div className="text-center py-12 bg-white/40">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-gray-900 mx-auto"></div>
-              <p className="mt-4 text-gray-900 font-semibold">Loading products...</p>
+              <LoadingDots />
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-12 bg-white/40">
@@ -1375,6 +1371,8 @@ export default function ProductsPage() {
                 <button
                   onClick={() => setShowAddProductModal(false)}
                   className="text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300"
+                  title="Close modal"
+                  aria-label="Close add product modal"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1536,8 +1534,6 @@ export default function ProductsPage() {
           </div>
         </div>
       )}
-      
-      <Footer />
     </div>
   );
 }

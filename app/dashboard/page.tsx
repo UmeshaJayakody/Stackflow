@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Navbar from '../components/Navbar';
 
 interface DashboardStats {
   totalProducts: number;
@@ -39,85 +38,72 @@ export default function DashboardPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-6">
+      <header className="bg-white/40 backdrop-blur-md shadow-lg border-b border-gray-200/50 pt-16">
+        <div className="container mx-auto px-6 md:px-8 lg:px-12 py-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Dashboard</h1>
             <p className="text-gray-600 mt-1">Overview of your inventory</p>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-6 md:px-8 lg:px-12 py-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6 transform hover:scale-105 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Products</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats?.totalProducts || 0}</p>
+                <p className="text-sm font-bold text-gray-600 uppercase tracking-wide">Total Products</p>
+                <p className="text-4xl font-bold text-gray-900 mt-3">{stats?.totalProducts || 0}</p>
               </div>
-              <div className="bg-blue-100 rounded-full p-3">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              <div className="bg-gradient-to-br from-blue-600 to-blue-500 p-4 rounded-xl">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6 transform hover:scale-105 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Inventory Value</p>
-                <p className="text-3xl font-bold text-green-600 mt-2">${stats?.totalInventoryValue || '0.00'}</p>
+                <p className="text-sm font-bold text-gray-600 uppercase tracking-wide">Inventory Value</p>
+                <p className="text-4xl font-bold text-green-600 mt-3">${stats?.totalInventoryValue || '0.00'}</p>
               </div>
-              <div className="bg-green-100 rounded-full p-3">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <div className="bg-gradient-to-br from-green-600 to-green-500 p-4 rounded-xl">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6 transform hover:scale-105 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Stock</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats?.totalStockQuantity || 0}</p>
+                <p className="text-sm font-bold text-gray-600 uppercase tracking-wide">Total Stock</p>
+                <p className="text-4xl font-bold text-gray-900 mt-3">{stats?.totalStockQuantity || 0}</p>
               </div>
-              <div className="bg-purple-100 rounded-full p-3">
-                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              <div className="bg-gradient-to-br from-purple-600 to-purple-500 p-4 rounded-xl">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                 </svg>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6 transform hover:scale-105 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Low Stock Items</p>
-                <p className="text-3xl font-bold text-red-600 mt-2">{stats?.lowStockCount || 0}</p>
+                <p className="text-sm font-bold text-gray-600 uppercase tracking-wide">Low Stock Items</p>
+                <p className="text-4xl font-bold text-red-600 mt-3">{stats?.lowStockCount || 0}</p>
               </div>
-              <div className="bg-red-100 rounded-full p-3">
-                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              <div className="bg-gradient-to-br from-red-600 to-red-500 p-4 rounded-xl">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
             </div>
@@ -125,7 +111,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Profit/Loss Graph */}
-        <div className="bg-white rounded-lg shadow mb-8">
+        <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 mb-8">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex justify-between items-center">
               <div>
@@ -285,7 +271,7 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Products by Warehouse */}
-          <div className="bg-white rounded-lg shadow">
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">Products by Warehouse</h2>
             </div>
@@ -308,7 +294,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Low Stock Products */}
-          <div className="bg-white rounded-lg shadow">
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">Low Stock Alert</h2>
               <p className="text-xs text-gray-500 mt-1">Items at or below min + 10% of stock range</p>
@@ -339,18 +325,18 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
           <div className="flex flex-wrap gap-4">
             <Link
               href="/products"
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              className="px-6 py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg hover:from-gray-800 hover:to-gray-700 font-medium shadow-lg hover:shadow-xl transition-all duration-300"
             >
               View All Products
             </Link>
             <Link
               href="/products/new"
-              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+              className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg hover:from-green-500 hover:to-green-400 font-medium shadow-lg hover:shadow-xl transition-all duration-300"
             >
               Add New Product
             </Link>

@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import LoadingDots from "../components/LoadingDots";
 
 interface User {
   userId: number;
@@ -55,12 +54,8 @@ export default function UsersPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
         <div className="flex items-center justify-center h-96">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading users...</p>
-          </div>
+          <LoadingDots />
         </div>
       </div>
     );
@@ -68,8 +63,6 @@ export default function UsersPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Navbar />
-
       <header className="bg-white/40 backdrop-blur-md shadow-lg border-b border-gray-200/50 pt-16">
         <div className="container mx-auto px-6 md:px-8 lg:px-12 py-6">
           <div className="flex justify-between items-center">
@@ -217,8 +210,6 @@ export default function UsersPage() {
           </div>
         </div>
       </main>
-      
-      <Footer />
 
       {/* Add User Modal */}
       {showAddUserModal && (

@@ -4,8 +4,6 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import * as XLSX from 'xlsx';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 
 export default function ReportsPage() {
   const router = useRouter();
@@ -141,8 +139,6 @@ export default function ReportsPage() {
 
   return (
     <div className="min-h-screen">
-      <Navbar />
-      
       <div className="max-w-7xl mx-auto px-6 md:px-8 lg:px-12 py-8 pt-24">
         {/* Header */}
         <div className="mb-8">
@@ -222,8 +218,6 @@ export default function ReportsPage() {
           </div>
         </div>
       </div>
-      
-      <Footer />
     </div>
   );
 }
