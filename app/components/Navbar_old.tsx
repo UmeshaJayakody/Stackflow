@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 
@@ -70,7 +71,7 @@ export default function Navbar() {
     const confirmPassword = formData.get('confirmPassword');
 
     if (newPassword !== confirmPassword) {
-      alert('New passwords do not match');
+      toast.success('New passwords do not match');
       return;
     }
 
@@ -86,16 +87,16 @@ export default function Navbar() {
       });
 
       if (response.ok) {
-        alert('Password changed successfully');
+        toast.success('Password changed successfully');
         form.reset();
         setShowChangePasswordModal(false);
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to change password');
+        toast.error(error.error || 'Failed to change password');
       }
     } catch (error) {
       console.error('Error changing password:', error);
-      alert('Failed to change password');
+      toast.error('Failed to change password');
     }
   };
 

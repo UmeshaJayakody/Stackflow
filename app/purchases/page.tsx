@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import LoadingDots from '../components/LoadingDots';
 
 interface Supplier {
@@ -31,12 +32,26 @@ interface Purchase {
 
 export default function PurchasesPage() {
   const { user } = useAuth();
+  const toast = useToast();
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [warehouses, setWarehouses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
+  const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [newProductForm, setNewProductForm] = useState({
+    productName: '',
+    sku: '',
+    category: '',
+    unitPrice: '',
+    quantity: '0',
+    minimumQuantity: '0',
+    maximumQuantity: '0',
+    warehouseId: '',
+    supplierId: '',
+  });
   const [formData, setFormData] = useState({
     supplierId: '',
     productId: '',
@@ -48,6 +63,7 @@ export default function PurchasesPage() {
     fetchPurchases();
     fetchSuppliers();
     fetchProducts();
+    fetchWarehouses();
   }, []);
 
   const fetchPurchases = async () => {
@@ -81,6 +97,18 @@ export default function PurchasesPage() {
       }
     } catch (error) {
       console.error('Error fetching products:', error);
+    }
+  };
+
+  const fetchWarehouses = async () => {
+    try {
+      const response = await fetch('/api/warehouses');
+      const result = await response.json();
+      if (result.success) {
+        setWarehouses(result.data);
+      }
+    } catch (error) {
+      console.error('Error fetching warehouses:', error);
     }
   };
 
@@ -118,11 +146,68 @@ export default function PurchasesPage() {
           }
         }, 100);
       } else {
-        alert('Failed to add supplier');
+        toast.error('Failed to add supplier');
       }
     } catch (error) {
       console.error('Error adding supplier:', error);
-      alert('An error occurred');
+      toast.error('An error occurred');
+    }
+  };
+
+  const handleAddProduct = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    try {
+      const response = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-id': user?.userId.toString() || ''
+        },
+        body: JSON.stringify({
+          ...newProductForm,
+          unitPrice: parseFloat(newProductForm.unitPrice),
+          quantity: parseInt(newProductForm.quantity),
+          minimumQuantity: parseInt(newProductForm.minimumQuantity),
+          maximumQuantity: parseInt(newProductForm.maximumQuantity),
+          warehouseId: parseInt(newProductForm.warehouseId),
+          supplierId: parseInt(newProductForm.supplierId),
+        }),
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        const newProduct = result.data || result;
+        await fetchProducts();
+        setShowAddProductModal(false);
+        setShowModal(true);
+        setNewProductForm({
+          productName: '',
+          sku: '',
+          category: '',
+          unitPrice: '',
+          quantity: '0',
+          minimumQuantity: '0',
+          maximumQuantity: '0',
+          warehouseId: '',
+          supplierId: '',
+        });
+        // Set the newly created product as selected
+        setTimeout(() => {
+          const selectElement = document.getElementById('productId') as HTMLSelectElement;
+          if (selectElement && newProduct.productId) {
+            selectElement.value = newProduct.productId.toString();
+            setFormData(prev => ({ ...prev, productId: newProduct.productId.toString() }));
+          }
+        }, 100);
+        toast.success('Product added successfully!');
+      } else {
+        const result = await response.json();
+        toast.error('Failed to add product: ' + (result.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error adding product:', error);
+      toast.error('An error occurred while adding the product');
     }
   };
 
@@ -143,7 +228,7 @@ export default function PurchasesPage() {
       const result = await response.json();
 
       if (response.ok) {
-        alert('Purchase recorded successfully! Stock updated.');
+        toast.success('Purchase recorded successfully! Stock updated.');
         setShowModal(false);
         setFormData({
           supplierId: '',
@@ -153,11 +238,11 @@ export default function PurchasesPage() {
         });
         fetchPurchases();
       } else {
-        alert('Failed to record purchase: ' + result.error);
+        toast.error('Failed to record purchase: ' + result.error);
       }
     } catch (error) {
       console.error('Error creating purchase:', error);
-      alert('An error occurred while recording the purchase');
+      toast.error('An error occurred while recording the purchase');
     } finally {
       setLoading(false);
     }
@@ -378,21 +463,31 @@ export default function PurchasesPage() {
                   <label htmlFor="productId" className="block text-sm font-bold text-gray-700 mb-2">
                     Product *
                   </label>
-                  <select
-                    id="productId"
-                    name="productId"
-                    value={formData.productId}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
-                  >
-                    <option value="">Select Product</option>
-                    {products.map((product) => (
-                      <option key={product.productId} value={product.productId}>
-                        {product.productName} ({product.sku})
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex gap-2">
+                    <select
+                      id="productId"
+                      name="productId"
+                      value={formData.productId}
+                      onChange={handleChange}
+                      required
+                      className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
+                    >
+                      <option value="">Select Product</option>
+                      {products.map((product) => (
+                        <option key={product.productId} value={product.productId}>
+                          {product.productName} ({product.sku})
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => { setShowModal(false); setShowAddProductModal(true); }}
+                      className="px-4 py-2 bg-gradient-to-r from-gray-700 to-gray-600 text-white rounded-xl hover:from-gray-600 hover:to-gray-500 font-bold whitespace-nowrap shadow-lg transition-all duration-300"
+                      title="Add New Product"
+                    >
+                      + Add
+                    </button>
+                  </div>
                 </div>
 
                 <div>
@@ -538,6 +633,190 @@ export default function PurchasesPage() {
                   type="button"
                   onClick={() => { setShowAddSupplierModal(false); setShowModal(true); }}
                   className="flex-1 px-6 py-2 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 font-bold shadow-md transition-all duration-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Product Modal */}
+      {showAddProductModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[60] p-4">
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden border-2 border-gray-300/50">
+            <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 p-6 rounded-t-3xl">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add New Product
+                  </h2>
+                  <p className="text-gray-300 mt-1">Create a new product in your inventory</p>
+                </div>
+                <button
+                  onClick={() => { setShowAddProductModal(false); setShowModal(true); }}
+                  className="text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300"
+                  title="Close"
+                  aria-label="Close add product modal"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <form onSubmit={handleAddProduct} className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Product Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={newProductForm.productName}
+                    onChange={(e) => setNewProductForm({...newProductForm, productName: e.target.value})}
+                    required
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                    placeholder="Enter product name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    SKU *
+                  </label>
+                  <input
+                    type="text"
+                    value={newProductForm.sku}
+                    onChange={(e) => setNewProductForm({...newProductForm, sku: e.target.value})}
+                    required
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                    placeholder="e.g., PROD001"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Category
+                  </label>
+                  <input
+                    type="text"
+                    value={newProductForm.category}
+                    onChange={(e) => setNewProductForm({...newProductForm, category: e.target.value})}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                    placeholder="e.g., Electronics"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Unit Price ($) *
+                  </label>
+                  <input
+                    type="number"
+                    value={newProductForm.unitPrice}
+                    onChange={(e) => setNewProductForm({...newProductForm, unitPrice: e.target.value})}
+                    required
+                    step="0.01"
+                    min="0"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                    placeholder="0.00"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Warehouse *
+                  </label>
+                  <select
+                    value={newProductForm.warehouseId}
+                    onChange={(e) => setNewProductForm({...newProductForm, warehouseId: e.target.value})}
+                    required
+                    title="Select a warehouse"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                  >
+                    <option value="">Select Warehouse</option>
+                    {warehouses.map((w) => (
+                      <option key={w.warehouseId} value={w.warehouseId}>{w.warehouseName}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Supplier *
+                  </label>
+                  <select
+                    value={newProductForm.supplierId}
+                    onChange={(e) => setNewProductForm({...newProductForm, supplierId: e.target.value})}
+                    required
+                    title="Select a supplier"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                  >
+                    <option value="">Select Supplier</option>
+                    {suppliers.map((s) => (
+                      <option key={s.supplierId} value={s.supplierId}>{s.supplierName}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Current Quantity
+                  </label>
+                  <input
+                    type="number"
+                    value="0"
+                    disabled
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-100 text-gray-500 cursor-not-allowed transition-all"
+                    title="Quantity is managed through purchases and sales"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Quantity will be updated through purchases</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Minimum Quantity
+                  </label>
+                  <input
+                    type="number"
+                    value={newProductForm.minimumQuantity}
+                    onChange={(e) => setNewProductForm({...newProductForm, minimumQuantity: e.target.value})}
+                    min="0"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Maximum Quantity
+                  </label>
+                  <input
+                    type="number"
+                    value={newProductForm.maximumQuantity}
+                    onChange={(e) => setNewProductForm({...newProductForm, maximumQuantity: e.target.value})}
+                    min="0"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-4 mt-6 pt-6 border-t border-gray-200">
+                <button
+                  type="submit"
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:from-black hover:to-gray-900 font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
+                >
+                  Create Product
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowAddProductModal(false); setShowModal(true); }}
+                  className="px-6 py-3 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 font-semibold transition-all duration-300 shadow-md hover:shadow-lg"
                 >
                   Cancel
                 </button>

@@ -56,12 +56,12 @@ export async function GET(request: NextRequest) {
       dayRecord.sales += 1;
     });
 
-    // Create array with all dates in range (including days with no sales)
+    // Create array with all dates in range (including today)
     const result = [];
     let totalRevenue = 0;
     let totalProfit = 0;
 
-    for (let i = 0; i < days; i++) {
+    for (let i = 0; i <= days; i++) {
       const date = new Date(startDate);
       date.setDate(date.getDate() + i);
       const dateStr = date.toISOString().split('T')[0];

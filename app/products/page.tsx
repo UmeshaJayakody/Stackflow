@@ -1560,11 +1560,12 @@ export default function ProductsPage() {
                   </label>
                   <input
                     type="number"
-                    value={newProductForm.quantity}
-                    onChange={(e) => setNewProductForm({...newProductForm, quantity: e.target.value})}
-                    min="0"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                    value="0"
+                    disabled
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-100 text-gray-500 cursor-not-allowed transition-all"
+                    title="Quantity is managed through purchases and sales"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Updated via purchases</p>
                 </div>
 
                 <div>
@@ -1730,11 +1731,11 @@ export default function ProductsPage() {
                   <input
                     type="number"
                     value={editProductForm.quantity}
-                    onChange={(e) => setEditProductForm({...editProductForm, quantity: e.target.value})}
-                    min="0"
-                    placeholder="0"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
+                    disabled
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-100 text-gray-500 cursor-not-allowed transition-all"
+                    title="Quantity is managed through purchases and sales"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Updated via purchases/sales</p>
                 </div>
 
                 <div>

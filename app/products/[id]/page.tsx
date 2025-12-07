@@ -80,12 +80,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           supplierId: product.supplierId?.toString() || '',
         });
       } else {
-        alert('Product not found');
+        toast.error('Product not found');
         router.push('/products');
       }
     } catch (error) {
       console.error('Error fetching product:', error);
-      alert('An error occurred while loading the product');
+      toast.error('An error occurred while loading the product');
     } finally {
       setFetching(false);
     }
@@ -129,14 +129,14 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       const result = await response.json();
       
       if (result.success) {
-        alert('Product updated successfully!');
+        toast.success('Product updated successfully!');
         router.push('/products');
       } else {
-        alert('Failed to update product: ' + result.error);
+        toast.error('Failed to update product: ' + result.error);
       }
     } catch (error) {
       console.error('Error updating product:', error);
-      alert('An error occurred while updating the product');
+      toast.error('An error occurred while updating the product');
     } finally {
       setLoading(false);
     }

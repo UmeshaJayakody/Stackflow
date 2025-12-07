@@ -248,11 +248,11 @@ export default function UsersPage() {
                   fetchUsers();
                 } else {
                   const error = await response.json();
-                  alert(error.error || 'Failed to add user');
+                  toast.error(error.error || 'Failed to add user');
                 }
               } catch (error) {
                 console.error('Error adding user:', error);
-                alert('Failed to add user');
+                toast.error('Failed to add user');
               }
             }}>
               <div className="p-6 space-y-4">
@@ -380,16 +380,16 @@ export default function UsersPage() {
                         })
                       }).then(async (response) => {
                         if (response.ok) {
-                          alert('Password reset successfully');
+                          toast.success('Password reset successfully');
                           setShowAdminUserModal(false);
                           setSelectedUser(null);
                         } else {
                           const error = await response.json();
-                          alert(error.error || 'Failed to reset password');
+                          toast.error(error.error || 'Failed to reset password');
                         }
-                      }).catch(() => alert('Failed to reset password'));
+                      }).catch(() => toast.error('Failed to reset password'));
                     } else if (newPassword !== null) {
-                      alert('Password must be at least 6 characters');
+                      toast.success('Password must be at least 6 characters');
                     }
                   }}
                   className="w-full px-4 py-3 bg-gradient-to-r from-gray-700 to-gray-800 text-white rounded-xl hover:from-gray-800 hover:to-gray-900 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 font-semibold"
@@ -407,15 +407,15 @@ export default function UsersPage() {
                         method: 'DELETE'
                       }).then(async (response) => {
                         if (response.ok) {
-                          alert('User deleted successfully');
+                          toast.success('User deleted successfully');
                           setShowAdminUserModal(false);
                           setSelectedUser(null);
                           fetchUsers();
                         } else {
                           const error = await response.json();
-                          alert(error.error || 'Failed to delete user');
+                          toast.error(error.error || 'Failed to delete user');
                         }
-                      }).catch(() => alert('Failed to delete user'));
+                      }).catch(() => toast.error('Failed to delete user'));
                     }
                   }}
                   className="w-full px-4 py-3 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl hover:from-gray-900 hover:to-black transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 font-semibold"

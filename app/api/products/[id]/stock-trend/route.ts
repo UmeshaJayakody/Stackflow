@@ -104,11 +104,11 @@ export async function GET(
       }
     });
 
-    // Create array with all dates in range
+    // Create array with all dates in range (including today)
     const result = [];
     let runningTotal = initialStock;
     
-    for (let i = 0; i < days; i++) {
+    for (let i = 0; i <= days; i++) {
       const date = new Date(startDate);
       date.setDate(date.getDate() + i);
       const dateStr = date.toISOString().split('T')[0];

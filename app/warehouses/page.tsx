@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import LoadingDots from '../components/LoadingDots';
 
 interface Warehouse {
@@ -15,6 +16,7 @@ interface Warehouse {
 
 export default function WarehousesPage() {
   const { user } = useAuth();
+  const toast = useToast();
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -31,10 +33,11 @@ export default function WarehousesPage() {
   const fetchWarehouses = async () => {
     try {
       const response = await fetch('/api/warehouses');
-      const data = await response.json();
-      setWarehouses(data);
+      const result = await response.json();
+      setWarehouses(result.data || []);
     } catch (error) {
       console.error('Error fetching warehouses:', error);
+      setWarehouses([]);
     } finally {
       setLoading(false);
     }
@@ -72,14 +75,14 @@ export default function WarehousesPage() {
         setShowModal(false);
         setEditingWarehouse(null);
         setFormData({ warehouseName: '', location: '' });
-        alert(editingWarehouse ? 'Warehouse updated successfully!' : 'Warehouse created successfully!');
+        toast.success(editingWarehouse ? 'Warehouse updated successfully!' : 'Warehouse created successfully!');
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to save warehouse');
+        toast.error(error.error || 'Failed to save warehouse');
       }
     } catch (error) {
       console.error('Error saving warehouse:', error);
-      alert('An error occurred. Please try again.');
+      toast.error('An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -109,14 +112,14 @@ export default function WarehousesPage() {
 
       if (response.ok) {
         await fetchWarehouses();
-        alert('Warehouse deleted successfully!');
+        toast.success('Warehouse deleted successfully!');
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to delete warehouse');
+        toast.error(error.error || 'Failed to delete warehouse');
       }
     } catch (error) {
       console.error('Error deleting warehouse:', error);
-      alert('An error occurred. Please try again.');
+      toast.error('An error occurred. Please try again.');
     }
   };
 

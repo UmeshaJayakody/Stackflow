@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/app/context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 interface Warehouse {
   warehouseId: number;
@@ -18,6 +19,7 @@ interface Supplier {
 export default function NewProductPage() {
   const router = useRouter();
   const { user } = useAuth();
+  const toast = useToast();
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(false);
@@ -90,11 +92,11 @@ export default function NewProductPage() {
           supplierId: newSupplier.supplierId.toString()
         }));
       } else {
-        alert('Failed to add supplier');
+        toast.error('Failed to add supplier');
       }
     } catch (error) {
       console.error('Error adding supplier:', error);
-      alert('An error occurred');
+      toast.error('An error occurred');
     }
   };
 
@@ -115,14 +117,14 @@ export default function NewProductPage() {
       const result = await response.json();
       
       if (result.success) {
-        alert('Product created successfully!');
+        toast.success('Product created successfully!');
         router.push('/products');
       } else {
-        alert('Failed to create product: ' + result.error);
+        toast.error('Failed to create product: ' + result.error);
       }
     } catch (error) {
       console.error('Error creating product:', error);
-      alert('An error occurred while creating the product');
+      toast.error('An error occurred while creating the product');
     } finally {
       setLoading(false);
     }
@@ -240,11 +242,12 @@ export default function NewProductPage() {
                     type="number"
                     id="quantity"
                     name="quantity"
-                    value={formData.quantity}
-                    onChange={handleChange}
-                    min="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value="0"
+                    disabled
+                    className="w-full px-4 py-2 border border-gray-200 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed"
+                    title="Quantity is managed through purchases and sales"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Updated via purchases</p>
                 </div>
 
                 <div>

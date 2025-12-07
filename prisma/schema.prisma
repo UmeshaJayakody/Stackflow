@@ -9,6 +9,7 @@ datasource db {
   provider = "postgresql"
 }
 
+
 // ========================
 // 1. USERS TABLE
 // ========================

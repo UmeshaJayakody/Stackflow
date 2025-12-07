@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 interface LogActivityParams {
   userId: number | null;
   action: 'CREATE' | 'UPDATE' | 'DELETE';
-  entityType: 'PRODUCT' | 'PURCHASE' | 'SALE' | 'SUPPLIER' | 'CUSTOMER';
+  entityType: 'PRODUCT' | 'PURCHASE' | 'SALE' | 'SUPPLIER' | 'CUSTOMER' | 'WAREHOUSE' | 'USER';
   entityId?: number;
   entityName?: string;
   details?: string;

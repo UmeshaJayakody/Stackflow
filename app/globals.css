@@ -121,6 +121,58 @@
   }
 }
 
+/* Toast Animation */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Enhanced Select Dropdown Styling */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23374151'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1.25rem;
+  padding-right: 2.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+select:hover {
+  border-color: #6b7280;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+select:focus {
+  border-color: #374151;
+  box-shadow: 0 0 0 3px rgba(55, 65, 81, 0.1);
+  outline: none;
+}
+
+select option {
+  padding: 0.75rem;
+  background-color: white;
+  color: #111827;
+  font-weight: 500;
+}
+
+select option:hover,
+select option:checked {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
 /* Custom Scrollbar for Glass Theme */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;

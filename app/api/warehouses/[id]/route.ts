@@ -5,11 +5,12 @@ import { logActivity } from '@/lib/activityLogger';
 // PUT update warehouse
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const userId = request.headers.get('x-user-id');
-    const warehouseId = parseInt(params.id);
+    const { id } = await params;
+    const warehouseId = parseInt(id);
     const body = await request.json();
     const { warehouseName, location } = body;
 
@@ -30,20 +31,23 @@ export async function PUT(
 
     // Log activity
     if (userId) {
-      await logActivity(
-        parseInt(userId),
-        'UPDATE',
-        'WAREHOUSE',
-        warehouseId,
-        `Updated warehouse: ${warehouseName}`
-      );
+      await logActivity({
+        userId: parseInt(userId),
+        action: 'UPDATE',
+        entityType: 'WAREHOUSE',
+        entityId: warehouseId,
+        details: `Updated warehouse: ${warehouseName}`
+      });
     }
 
-    return NextResponse.json(warehouse);
+    return NextResponse.json({ 
+      success: true, 
+      data: warehouse 
+    });
   } catch (error: any) {
     console.error('Error updating warehouse:', error);
     return NextResponse.json(
-      { error: 'Failed to update warehouse', message: error.message },
+      { success: false, error: 'Failed to update warehouse', message: error.message },
       { status: 500 }
     );
   }
@@ -52,11 +56,12 @@ export async function PUT(
 // DELETE warehouse
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const userId = request.headers.get('x-user-id');
-    const warehouseId = parseInt(params.id);
+    const { id } = await params;
+    const warehouseId = parseInt(id);
 
     // Check if warehouse has products
     const warehouse = await prisma.warehouse.findUnique({
@@ -88,20 +93,23 @@ export async function DELETE(
 
     // Log activity
     if (userId) {
-      await logActivity(
-        parseInt(userId),
-        'DELETE',
-        'WAREHOUSE',
-        warehouseId,
-        `Deleted warehouse: ${warehouse.warehouseName}`
-      );
+      await logActivity({
+        userId: parseInt(userId),
+        action: 'DELETE',
+        entityType: 'WAREHOUSE',
+        entityId: warehouseId,
+        details: `Deleted warehouse: ${warehouse.warehouseName}`
+      });
     }
 
-    return NextResponse.json({ message: 'Warehouse deleted successfully' });
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Warehouse deleted successfully' 
+    });
   } catch (error: any) {
     console.error('Error deleting warehouse:', error);
     return NextResponse.json(
-      { error: 'Failed to delete warehouse', message: error.message },
+      { success: false, error: 'Failed to delete warehouse', message: error.message },
       { status: 500 }
     );
   }

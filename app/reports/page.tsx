@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import * as XLSX from 'xlsx';
 
 export default function ReportsPage() {
@@ -27,7 +28,7 @@ export default function ReportsPage() {
       const data = await response.json();
 
       if (data.length === 0) {
-        alert(`No ${reportType} data available to export`);
+        toast.warning(`No ${reportType} data available to export`);
         return;
       }
 
@@ -42,7 +43,7 @@ export default function ReportsPage() {
       XLSX.writeFile(wb, `${fileName}_${new Date().toISOString().split('T')[0]}.xlsx`);
     } catch (error) {
       console.error('Error downloading report:', error);
-      alert('Failed to download report');
+      toast.error('Failed to download report');
     }
   };
 

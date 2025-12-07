@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
+import { ToastProvider } from "./context/ToastContext";
 import LayoutWrapper from "./components/LayoutWrapper";
 
 const geistSans = Geist({
@@ -55,7 +56,9 @@ export default function RootLayout({
         `}</style>
         <div className="relative z-10">
           <AuthProvider>
-            <LayoutWrapper>{children}</LayoutWrapper>
+            <ToastProvider>
+              <LayoutWrapper>{children}</LayoutWrapper>
+            </ToastProvider>
           </AuthProvider>
         </div>
       </body>

@@ -54,16 +54,19 @@ export async function POST(request: NextRequest) {
 
     // Log activity
     if (userId) {
-      await logActivity(
-        parseInt(userId),
-        'CREATE',
-        'WAREHOUSE',
-        warehouse.warehouseId,
-        `Created warehouse: ${warehouseName}`
-      );
+      await logActivity({
+        userId: parseInt(userId),
+        action: 'CREATE',
+        entityType: 'WAREHOUSE',
+        entityId: warehouse.warehouseId,
+        details: `Created warehouse: ${warehouseName}`
+      });
     }
 
-    return NextResponse.json(warehouse, { status: 201 });
+    return NextResponse.json({ 
+      success: true, 
+      data: warehouse 
+    }, { status: 201 });
   } catch (error: any) {
     console.error('Error creating warehouse:', error);
     return NextResponse.json(

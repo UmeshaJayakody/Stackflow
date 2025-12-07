@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import LoadingDots from '../components/LoadingDots';
 
 interface Customer {
@@ -34,6 +35,7 @@ interface Sale {
 
 export default function SalesPage() {
   const { user } = useAuth();
+  const toast = useToast();
   const [sales, setSales] = useState<Sale[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -120,11 +122,11 @@ export default function SalesPage() {
           }
         }, 100);
       } else {
-        alert('Failed to add customer');
+        toast.error('Failed to add customer');
       }
     } catch (error) {
       console.error('Error adding customer:', error);
-      alert('An error occurred');
+      toast.error('An error occurred');
     }
   };
 
@@ -145,7 +147,7 @@ export default function SalesPage() {
       const result = await response.json();
 
       if (response.ok) {
-        alert('Sale recorded successfully! Stock updated.');
+        toast.success('Sale recorded successfully! Stock updated.');
         setShowModal(false);
         setFormData({
           customerId: '',
@@ -156,11 +158,11 @@ export default function SalesPage() {
         fetchSales();
         fetchProducts(); // Refresh to update available stock
       } else {
-        alert('Failed to record sale: ' + result.error);
+        toast.error('Failed to record sale: ' + result.error);
       }
     } catch (error) {
       console.error('Error creating sale:', error);
-      alert('An error occurred while recording the sale');
+      toast.error('An error occurred while recording the sale');
     } finally {
       setLoading(false);
     }
