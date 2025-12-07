@@ -77,19 +77,19 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
+                <Link href="/documentation" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
                   Documentation
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
+                <Link href="/support" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
                   Support
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
+                <Link href="/faq" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
                   FAQ
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
