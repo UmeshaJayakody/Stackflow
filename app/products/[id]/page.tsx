@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import LoadingDots from '@/app/components/LoadingDots';
 
 interface Warehouse {
   warehouseId: number;
@@ -66,6 +68,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       const response = await fetch(`/api/products/${productId}`);
       const result = await response.json();
       
+      if (response.status === 404) {
+        // Redirect to not found page
+        notFound();
+        return;
+      }
+      
       if (result.success) {
         const product = result.data;
         setFormData({
@@ -80,12 +88,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           supplierId: product.supplierId?.toString() || '',
         });
       } else {
-        toast.error('Product not found');
+        alert('Failed to load product');
         router.push('/products');
       }
     } catch (error) {
       console.error('Error fetching product:', error);
-      toast.error('An error occurred while loading the product');
+      router.push('/products');
     } finally {
       setFetching(false);
     }
@@ -129,14 +137,14 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       const result = await response.json();
       
       if (result.success) {
-        toast.success('Product updated successfully!');
+        alert('Product updated successfully!');
         router.push('/products');
       } else {
-        toast.error('Failed to update product: ' + result.error);
+        alert('Failed to update product: ' + result.error);
       }
     } catch (error) {
       console.error('Error updating product:', error);
-      toast.error('An error occurred while updating the product');
+      alert('An error occurred while updating the product');
     } finally {
       setLoading(false);
     }
@@ -151,27 +159,28 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
   if (fetching) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading product...</p>
+          <LoadingDots />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
+    <div className="min-h-screen bg-white">
+      <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="container mx-auto px-4 py-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Edit Product</h1>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Edit Product
+              </h1>
               <p className="text-gray-600 mt-1">Update product information</p>
             </div>
             <Link
               href="/products"
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-900 rounded-lg hover:bg-gray-100 transition-all duration-200"
             >
               ← Back to Products
             </Link>
@@ -179,180 +188,204 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <div className="bg-white rounded-lg shadow p-6">
+      <main className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-8">
           <form onSubmit={handleSubmit}>
-            <div className="space-y-6">
-              {/* Product Name */}
+            <div className="space-y-8">
+              {/* Product Information Section */}
               <div>
-                <label htmlFor="productName" className="block text-sm font-medium text-gray-700 mb-2">
-                  Product Name *
-                </label>
-                <input
-                  type="text"
-                  id="productName"
-                  name="productName"
-                  value={formData.productName}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter product name"
-                />
-              </div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                  Product Information
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Product Name */}
+                  <div className="md:col-span-2">
+                    <label htmlFor="productName" className="block text-sm font-medium text-gray-900 mb-2">
+                      Product Name *
+                    </label>
+                    <input
+                      type="text"
+                      id="productName"
+                      name="productName"
+                      value={formData.productName}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-900 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                      placeholder="Enter product name"
+                    />
+                  </div>
 
-              {/* SKU */}
-              <div>
-                <label htmlFor="sku" className="block text-sm font-medium text-gray-700 mb-2">
-                  SKU (Stock Keeping Unit) *
-                </label>
-                <input
-                  type="text"
-                  id="sku"
-                  name="sku"
-                  value={formData.sku}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., PROD001, LAP-HP-001"
-                />
-              </div>
+                  {/* SKU */}
+                  <div>
+                    <label htmlFor="sku" className="block text-sm font-medium text-gray-900 mb-2">
+                      SKU (Stock Keeping Unit) *
+                    </label>
+                    <input
+                      type="text"
+                      id="sku"
+                      name="sku"
+                      value={formData.sku}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-900 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                      placeholder="e.g., PROD001"
+                    />
+                  </div>
 
-              {/* Category */}
-              <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                  Category
-                </label>
-                <input
-                  type="text"
-                  id="category"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., Electronics, Accessories"
-                />
-              </div>
-
-              {/* Unit Price */}
-              <div>
-                <label htmlFor="unitPrice" className="block text-sm font-medium text-gray-700 mb-2">
-                  Unit Price ($) *
-                </label>
-                <input
-                  type="number"
-                  id="unitPrice"
-                  name="unitPrice"
-                  value={formData.unitPrice}
-                  onChange={handleChange}
-                  required
-                  step="0.01"
-                  min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              {/* Quantity */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-2">
-                    Current Quantity
-                  </label>
-                  <input
-                    type="number"
-                    id="quantity"
-                    name="quantity"
-                    value={formData.quantity}
-                    onChange={handleChange}
-                    min="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="minimumQuantity" className="block text-sm font-medium text-gray-700 mb-2">
-                    Min Quantity
-                  </label>
-                  <input
-                    type="number"
-                    id="minimumQuantity"
-                    name="minimumQuantity"
-                    value={formData.minimumQuantity}
-                    onChange={handleChange}
-                    min="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="maximumQuantity" className="block text-sm font-medium text-gray-700 mb-2">
-                    Max Quantity
-                  </label>
-                  <input
-                    type="number"
-                    id="maximumQuantity"
-                    name="maximumQuantity"
-                    value={formData.maximumQuantity}
-                    onChange={handleChange}
-                    min="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
+                  {/* Category */}
+                  <div>
+                    <label htmlFor="category" className="block text-sm font-medium text-gray-900 mb-2">
+                      Category
+                    </label>
+                    <input
+                      type="text"
+                      id="category"
+                      name="category"
+                      value={formData.category}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-900 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                      placeholder="e.g., Electronics"
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Warehouse */}
+              {/* Pricing & Inventory Section */}
               <div>
-                <label htmlFor="warehouseId" className="block text-sm font-medium text-gray-700 mb-2">
-                  Warehouse
-                </label>
-                <select
-                  id="warehouseId"
-                  name="warehouseId"
-                  value={formData.warehouseId}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Select Warehouse (Optional)</option>
-                  {warehouses.map((warehouse) => (
-                    <option key={warehouse.warehouseId} value={warehouse.warehouseId}>
-                      {warehouse.warehouseName}
-                    </option>
-                  ))}
-                </select>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                  Pricing & Inventory
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  {/* Unit Price */}
+                  <div>
+                    <label htmlFor="unitPrice" className="block text-sm font-medium text-gray-900 mb-2">
+                      Unit Price ($) *
+                    </label>
+                    <input
+                      type="number"
+                      id="unitPrice"
+                      name="unitPrice"
+                      value={formData.unitPrice}
+                      onChange={handleChange}
+                      required
+                      step="0.01"
+                      min="0"
+                      className="w-full px-4 py-3 border border-gray-900 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                    />
+                  </div>
+
+                  {/* Current Quantity - LOCKED */}
+                  <div>
+                    <label htmlFor="quantity" className="block text-sm font-medium text-gray-900 mb-2">
+                      Current Quantity
+                    </label>
+                    <input
+                      type="number"
+                      id="quantity"
+                      name="quantity"
+                      value={formData.quantity}
+                      readOnly
+                      disabled
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+                    />
+                  </div>
+
+                  {/* Min Quantity */}
+                  <div>
+                    <label htmlFor="minimumQuantity" className="block text-sm font-medium text-gray-900 mb-2">
+                      Min Quantity
+                    </label>
+                    <input
+                      type="number"
+                      id="minimumQuantity"
+                      name="minimumQuantity"
+                      value={formData.minimumQuantity}
+                      onChange={handleChange}
+                      min="0"
+                      className="w-full px-4 py-3 border border-gray-900 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                    />
+                  </div>
+
+                  {/* Max Quantity */}
+                  <div>
+                    <label htmlFor="maximumQuantity" className="block text-sm font-medium text-gray-900 mb-2">
+                      Max Quantity
+                    </label>
+                    <input
+                      type="number"
+                      id="maximumQuantity"
+                      name="maximumQuantity"
+                      value={formData.maximumQuantity}
+                      onChange={handleChange}
+                      min="0"
+                      className="w-full px-4 py-3 border border-gray-900 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                    />
+                  </div>
+                </div>
               </div>
 
-              {/* Supplier */}
+              {/* Warehouse & Supplier Section */}
               <div>
-                <label htmlFor="supplierId" className="block text-sm font-medium text-gray-700 mb-2">
-                  Supplier
-                </label>
-                <select
-                  id="supplierId"
-                  name="supplierId"
-                  value={formData.supplierId}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Select Supplier (Optional)</option>
-                  {suppliers.map((supplier) => (
-                    <option key={supplier.supplierId} value={supplier.supplierId}>
-                      {supplier.supplierName}
-                    </option>
-                  ))}
-                </select>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                  Warehouse & Supplier
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Warehouse */}
+                  <div>
+                    <label htmlFor="warehouseId" className="block text-sm font-medium text-gray-900 mb-2">
+                      Warehouse
+                    </label>
+                    <select
+                      id="warehouseId"
+                      name="warehouseId"
+                      value={formData.warehouseId}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-900 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all bg-white"
+                    >
+                      <option value="">Select Warehouse (Optional)</option>
+                      {warehouses.map((warehouse) => (
+                        <option key={warehouse.warehouseId} value={warehouse.warehouseId}>
+                          {warehouse.warehouseName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Supplier */}
+                  <div>
+                    <label htmlFor="supplierId" className="block text-sm font-medium text-gray-900 mb-2">
+                      Supplier
+                    </label>
+                    <select
+                      id="supplierId"
+                      name="supplierId"
+                      value={formData.supplierId}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-900 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all bg-white"
+                    >
+                      <option value="">Select Supplier (Optional)</option>
+                      {suppliers.map((supplier) => (
+                        <option key={supplier.supplierId} value={supplier.supplierId}>
+                          {supplier.supplierName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </div>
 
               {/* Buttons */}
-              <div className="flex gap-4 pt-4">
+              <div className="flex gap-4 pt-6 border-t border-gray-200">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+                  className="flex-1 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium shadow-lg hover:shadow-xl transition-all duration-200"
                 >
-                  {loading ? 'Updating...' : 'Update Product'}
+                  {loading ? <LoadingDots /> : 'Update Product'}
                 </button>
                 <Link
                   href="/products"
-                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 font-medium"
+                  className="px-6 py-3 bg-white text-gray-900 border border-gray-900 rounded-lg hover:bg-gray-100 font-medium shadow-md hover:shadow-lg transition-all duration-200"
                 >
                   Cancel
                 </Link>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, DollarSign, Wallet } from 'lucide-react';
+import LoadingDots from '../LoadingDots';
 
 interface DailyProfit {
   date: string;
@@ -148,7 +149,7 @@ export default function DailyProfitLossBar() {
         {/* Bar Chart */}
         {loading ? (
           <div className="h-80 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-gray-900"></div>
+            <LoadingDots />
           </div>
         ) : hasData ? (
           <div className="relative bg-white/20 rounded-xl p-3 sm:p-6">

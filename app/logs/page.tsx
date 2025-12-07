@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
+import LoadingDots from '../components/LoadingDots';
 
 interface ActivityLog {
   logId: number;
@@ -246,7 +247,7 @@ export default function LogsPage() {
           
           {loading ? (
             <div className="text-center py-12 bg-white/40">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-gray-900 mx-auto"></div>
+              <LoadingDots />
               <p className="mt-4 text-gray-900 font-semibold">Loading logs...</p>
             </div>
           ) : filteredLogs.length === 0 ? (

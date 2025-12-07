@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, ChevronDown } from 'lucide-react';
+import LoadingDots from '../LoadingDots';
 
 interface Product {
   productId: number;
@@ -164,7 +165,7 @@ export default function ProductStockTrend() {
         {/* Chart */}
         {loading ? (
           <div className="h-64 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-gray-900"></div>
+            <LoadingDots />
           </div>
         ) : stockData.length > 0 ? (
           <div className="relative h-64 bg-white/20 rounded-xl p-4">
