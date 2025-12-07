@@ -56,21 +56,21 @@ function StatCard({ title, value, subtitle, icon, trend, trendDirection, color }
   const config = colorConfig[color];
 
   return (
-    <div className={`group relative bg-gradient-to-br ${config.bg} backdrop-blur-md border border-white/60 rounded-2xl p-6 hover:scale-[1.02] transition-all duration-300 hover:shadow-2xl ${config.glow} overflow-hidden`}>
+    <div className={`group relative bg-gradient-to-br ${config.bg} backdrop-blur-md border border-white/60 rounded-2xl p-4 sm:p-6 hover:scale-[1.02] transition-all duration-300 shadow-xl hover:shadow-2xl ${config.glow} overflow-hidden`}>
       <div className={`absolute inset-0 bg-gradient-to-br ${config.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
       <div className="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-white/40 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
       
       <div className="relative">
-        <div className="flex items-start justify-between mb-3">
-          <h3 className="text-sm font-medium text-gray-600">{title}</h3>
+        <div className="flex items-start justify-between mb-2 sm:mb-3">
+          <h3 className="text-xs sm:text-sm font-medium text-gray-600">{title}</h3>
           {trend && trendDirection && (
-            <div className={`flex items-center gap-1 text-sm font-semibold ${
+            <div className={`flex items-center gap-1 text-xs sm:text-sm font-semibold ${
               trendDirection === 'up' ? 'text-green-600' : 'text-red-600'
             }`}>
               {trendDirection === 'up' ? (
-                <TrendingUp className="w-4 h-4" />
+                <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
               ) : (
-                <TrendingDown className="w-4 h-4" />
+                <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4" />
               )}
               {trend}
             </div>
@@ -79,10 +79,10 @@ function StatCard({ title, value, subtitle, icon, trend, trendDirection, color }
         
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-3xl font-bold text-gray-900">{value}</p>
-            {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
+            <p className="text-2xl sm:text-3xl font-bold text-gray-900">{value}</p>
+            {subtitle && <p className="text-[10px] sm:text-xs text-gray-500 mt-1">{subtitle}</p>}
           </div>
-          <div className={`p-3 rounded-xl bg-gradient-to-br ${config.iconBg} shadow-lg ${config.glow} text-white transform group-hover:rotate-12 transition-transform duration-300`}>
+          <div className={`p-2 sm:p-3 rounded-xl bg-gradient-to-br ${config.iconBg} shadow-lg ${config.glow} text-white transform group-hover:rotate-12 transition-transform duration-300`}>
             {icon}
           </div>
         </div>
@@ -96,25 +96,25 @@ export default function FeaturedCrmDemoSection({ stats }: { stats: DashboardStat
     {
       title: 'Total Products',
       value: stats.totalProducts.toString(),
-      icon: <Package className="w-6 h-6" />,
+      icon: <Package className="w-5 h-5 sm:w-6 sm:h-6" />,
       color: 'blue'
     },
     {
       title: 'Inventory Value',
       value: `$${stats.totalInventoryValue}`,
-      icon: <DollarSign className="w-6 h-6" />,
+      icon: <DollarSign className="w-5 h-5 sm:w-6 sm:h-6" />,
       color: 'green'
     },
     {
       title: 'Total Stock',
       value: stats.totalStockQuantity.toString(),
-      icon: <Archive className="w-6 h-6" />,
+      icon: <Archive className="w-5 h-5 sm:w-6 sm:h-6" />,
       color: 'purple'
     },
     {
       title: 'Low Stock Items',
       value: stats.lowStockCount.toString(),
-      icon: <AlertTriangle className="w-6 h-6" />,
+      icon: <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6" />,
       color: 'red'
     }
   ];
@@ -122,13 +122,13 @@ export default function FeaturedCrmDemoSection({ stats }: { stats: DashboardStat
   return (
     <div className="w-full">
       {/* Section Title */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent mb-2">Inventory Overview</h2>
-        <p className="text-sm text-gray-600">Real-time insights into your stock management</p>
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent mb-1 sm:mb-2">Inventory Overview</h2>
+        <p className="text-xs sm:text-sm text-gray-600">Real-time insights into your stock management</p>
       </div>
       
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
         {statCards.map((stat, index) => (
           <StatCard key={index} {...stat} />
         ))}

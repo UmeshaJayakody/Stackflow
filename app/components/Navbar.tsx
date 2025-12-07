@@ -11,6 +11,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout, isAdmin } = useAuth();
+  const toast = useToast();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -107,14 +108,14 @@ export default function Navbar() {
           ? 'bg-white/80 backdrop-blur-xl shadow-lg border-b border-gray-200/50' 
           : 'bg-white/70 backdrop-blur-lg border-b border-gray-100/50'
       }`}>
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-3 sm:px-4 md:px-6">
           {/* Subtle gradient line at top */}
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-300/50 to-transparent"></div>
           
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center space-x-3 group cursor-pointer py-2 px-3 rounded-xl transition-all duration-300 hover:bg-white/60">
-              <div className="relative w-10 h-10 flex items-center justify-center">
+            <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group cursor-pointer py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl transition-all duration-300 hover:bg-white/60">
+              <div className="relative w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
                 <Image 
                   src="/StackFlow.svg" 
                   alt="StackFlow Logo" 
@@ -123,16 +124,16 @@ export default function Navbar() {
                   className="relative z-10"
                 />
               </div>
-              <div className="hidden sm:block">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent group-hover:from-gray-800 group-hover:to-gray-600 transition-all duration-300 leading-tight">
+              <div>
+                <h1 className="text-base sm:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent group-hover:from-gray-800 group-hover:to-gray-600 transition-all duration-300 leading-tight">
                   StackFlow
                 </h1>
-                <p className="text-xs text-gray-500 font-medium">Inventory Management System</p>
+                <p className="hidden sm:block text-xs text-gray-500 font-medium">Inventory Management System</p>
               </div>
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-3">
+            <div className="hidden lg:flex items-center space-x-2">
               {visibleNavItems.map((item) => {
                 const active = isActive(item.path);
                 return (
@@ -140,7 +141,7 @@ export default function Navbar() {
                     key={item.path}
                     href={item.path}
                     className={`
-                      relative px-6 py-2.5 rounded-xl text-base font-medium transition-colors duration-200 min-w-[120px] text-center
+                      relative px-4 py-2 rounded-xl text-base font-medium transition-colors duration-200 text-center whitespace-nowrap
                       ${active
                         ? 'bg-white/95 backdrop-blur-md text-gray-900 shadow-xl shadow-gray-300/60'
                         : 'text-gray-600 hover:bg-white/60 hover:text-gray-900 hover:shadow-sm'
@@ -154,7 +155,7 @@ export default function Navbar() {
             </div>
 
             {/* Desktop Actions */}
-            <div className="hidden md:flex items-center space-x-3">
+            <div className="hidden lg:flex items-center space-x-2">
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
@@ -209,19 +210,39 @@ export default function Navbar() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="md:hidden p-2 rounded-xl bg-gray-100/70 hover:bg-gray-200/70 text-gray-700 transition-all duration-300 border border-gray-200/50"
+              className="lg:hidden p-2 rounded-lg bg-white/80 hover:bg-white/95 text-gray-700 transition-all duration-300 border border-gray-200/50 shadow-sm"
               aria-label="Toggle menu"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              {showMobileMenu ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
             </button>
           </div>
 
           {/* Mobile Menu */}
           {showMobileMenu && (
-            <div className="md:hidden pb-4 border-t border-gray-200/50 mt-2 pt-4">
-              <div className="flex flex-col space-y-3">
+            <div className="lg:hidden pb-3 border-t border-gray-200/50 mt-2 pt-3">
+              <div className="flex flex-col space-y-2">
+                {/* User Info */}
+                <div className="px-3 py-2.5 bg-white/80 rounded-xl border border-gray-200/50 mb-1">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white text-sm font-semibold shadow-md">
+                      {user?.fullName?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    <div className="text-sm">
+                      <p className="font-medium text-gray-900 truncate">{user?.fullName || 'User'}</p>
+                      <p className="text-xs text-gray-600">{user?.role || 'Role'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Navigation Items */}
                 {visibleNavItems.map((item) => {
                   const active = isActive(item.path);
                   return (
@@ -230,9 +251,9 @@ export default function Navbar() {
                       href={item.path}
                       onClick={() => setShowMobileMenu(false)}
                       className={`
-                        relative px-4 py-3 rounded-xl text-base font-medium transition-colors duration-200
+                        relative px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200
                         ${active
-                          ? 'bg-white/95 backdrop-blur-md text-gray-900 shadow-xl shadow-gray-300/60'
+                          ? 'bg-white/95 backdrop-blur-md text-gray-900 shadow-lg'
                           : 'text-gray-600 hover:bg-white/60 hover:text-gray-900'
                         }
                       `}
@@ -241,6 +262,37 @@ export default function Navbar() {
                     </Link>
                   );
                 })}
+
+                {/* Divider */}
+                <hr className="border-gray-200/50 my-1" />
+
+                {/* Change Password */}
+                <button
+                  onClick={() => {
+                    setShowMobileMenu(false);
+                    setShowChangePasswordModal(true);
+                  }}
+                  className="px-3 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-white/60 hover:text-gray-900 transition-all duration-200 rounded-lg flex items-center gap-2.5"
+                >
+                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                  </svg>
+                  <span>Change Password</span>
+                </button>
+
+                {/* Logout */}
+                <button
+                  onClick={() => {
+                    setShowMobileMenu(false);
+                    handleLogout();
+                  }}
+                  className="px-3 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50/70 transition-all duration-200 rounded-lg flex items-center gap-2.5"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>Logout</span>
+                </button>
               </div>
             </div>
           )}

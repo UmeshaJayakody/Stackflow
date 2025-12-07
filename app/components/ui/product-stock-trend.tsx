@@ -72,7 +72,7 @@ export default function ProductStockTrend() {
   const stockChangePercent = previousStock !== 0 ? ((stockChange / previousStock) * 100).toFixed(1) : '0.0';
 
   return (
-    <div className="relative bg-white/40 backdrop-blur-md border border-gray-200/50 rounded-2xl p-6 shadow-xl overflow-hidden">
+    <div className="relative bg-white/40 backdrop-blur-md border border-gray-200/50 rounded-2xl p-4 sm:p-6 shadow-2xl hover:shadow-3xl overflow-hidden transition-shadow duration-300">
       <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent"></div>
       
       <div className="relative">

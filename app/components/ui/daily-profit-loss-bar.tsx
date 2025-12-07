@@ -49,49 +49,49 @@ export default function DailyProfitLossBar() {
   const hasData = dailyData.some(d => d.revenue > 0 || d.profit !== 0);
 
   return (
-    <div className="relative bg-white/40 backdrop-blur-md border border-gray-200/50 rounded-2xl p-6 shadow-xl overflow-hidden">
+    <div className="relative bg-white/40 backdrop-blur-md border border-gray-200/50 rounded-2xl p-4 sm:p-6 shadow-2xl hover:shadow-3xl overflow-hidden transition-shadow duration-300">
       <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent"></div>
       
       <div className="relative">
         {/* Header with Stats */}
-        <div className="mb-6">
-          <div className="flex items-start justify-between mb-4">
+        <div className="mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-3 sm:gap-0 mb-4">
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Daily Profit & Loss Analysis</h3>
-              <p className="text-sm text-gray-600">Revenue and profit trends over time</p>
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">Daily Profit & Loss Analysis</h3>
+              <p className="text-xs sm:text-sm text-gray-600">Revenue and profit trends over time</p>
             </div>
             
             {/* Time Range Selector */}
-            <div className="flex gap-2">
+            <div className="flex gap-1.5 sm:gap-2 w-full sm:w-auto">
               {(['7d', '30d', '90d'] as const).map((range) => (
                 <button
                   key={range}
                   onClick={() => setTimeRange(range)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
+                  className={`flex-1 sm:flex-none px-2 sm:px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
                     timeRange === range
                       ? 'bg-gray-900 text-white shadow-lg'
                       : 'bg-white/60 text-gray-700 hover:bg-white/80'
                   }`}
                 >
-                  {range === '7d' ? '7 days' : range === '30d' ? '30 days' : '90 days'}
+                  {range === '7d' ? '7d' : range === '30d' ? '30d' : '90d'}
                 </button>
               ))}
             </div>
           </div>
 
           {/* Summary Stats Cards */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6">
             {/* Total Revenue */}
-            <div className="relative bg-gradient-to-br from-blue-50/80 to-blue-100/40 backdrop-blur-sm rounded-xl p-4 border border-blue-200/50 overflow-hidden">
+            <div className="relative bg-gradient-to-br from-blue-50/80 to-blue-100/40 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-blue-200/50 overflow-hidden">
               <div className="absolute top-0 right-0 w-20 h-20 bg-blue-400/10 rounded-full -mr-10 -mt-10"></div>
               <div className="relative">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="p-2 bg-blue-500/20 rounded-lg">
-                    <DollarSign className="w-4 h-4 text-blue-600" />
+                  <div className="p-1.5 sm:p-2 bg-blue-500/20 rounded-lg">
+                    <DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" />
                   </div>
                   <p className="text-xs font-medium text-blue-900">Total Revenue</p>
                 </div>
-                <p className="text-2xl font-bold text-blue-900">${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p className="text-xl sm:text-2xl font-bold text-blue-900">${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 <p className="text-xs text-blue-700 mt-1">
                   {dailyData.reduce((sum, d) => sum + d.sales, 0)} total sales
                 </p>
@@ -99,16 +99,16 @@ export default function DailyProfitLossBar() {
             </div>
 
             {/* Total Profit */}
-            <div className={`relative bg-gradient-to-br ${totalProfit >= 0 ? 'from-green-50/80 to-green-100/40' : 'from-red-50/80 to-red-100/40'} backdrop-blur-sm rounded-xl p-4 border ${totalProfit >= 0 ? 'border-green-200/50' : 'border-red-200/50'} overflow-hidden`}>
+            <div className={`relative bg-gradient-to-br ${totalProfit >= 0 ? 'from-green-50/80 to-green-100/40' : 'from-red-50/80 to-red-100/40'} backdrop-blur-sm rounded-xl p-3 sm:p-4 border ${totalProfit >= 0 ? 'border-green-200/50' : 'border-red-200/50'} overflow-hidden`}>
               <div className={`absolute top-0 right-0 w-20 h-20 ${totalProfit >= 0 ? 'bg-green-400/10' : 'bg-red-400/10'} rounded-full -mr-10 -mt-10`}></div>
               <div className="relative">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className={`p-2 ${totalProfit >= 0 ? 'bg-green-500/20' : 'bg-red-500/20'} rounded-lg`}>
-                    <Wallet className={`w-4 h-4 ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`} />
+                  <div className={`p-1.5 sm:p-2 ${totalProfit >= 0 ? 'bg-green-500/20' : 'bg-red-500/20'} rounded-lg`}>
+                    <Wallet className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`} />
                   </div>
                   <p className={`text-xs font-medium ${totalProfit >= 0 ? 'text-green-900' : 'text-red-900'}`}>Total Profit</p>
                 </div>
-                <p className={`text-2xl font-bold ${totalProfit >= 0 ? 'text-green-900' : 'text-red-900'}`}>
+                <p className={`text-xl sm:text-2xl font-bold ${totalProfit >= 0 ? 'text-green-900' : 'text-red-900'}`}>
                   {totalProfit >= 0 ? '+' : ''}${Math.abs(totalProfit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
                 <div className="flex items-center gap-1 mt-1">
@@ -125,16 +125,16 @@ export default function DailyProfitLossBar() {
             </div>
 
             {/* Average Daily Profit */}
-            <div className="relative bg-gradient-to-br from-purple-50/80 to-purple-100/40 backdrop-blur-sm rounded-xl p-4 border border-purple-200/50 overflow-hidden">
+            <div className="relative bg-gradient-to-br from-purple-50/80 to-purple-100/40 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-purple-200/50 overflow-hidden">
               <div className="absolute top-0 right-0 w-20 h-20 bg-purple-400/10 rounded-full -mr-10 -mt-10"></div>
               <div className="relative">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="p-2 bg-purple-500/20 rounded-lg">
-                    <TrendingUp className="w-4 h-4 text-purple-600" />
+                  <div className="p-1.5 sm:p-2 bg-purple-500/20 rounded-lg">
+                    <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-600" />
                   </div>
                   <p className="text-xs font-medium text-purple-900">Avg Daily Profit</p>
                 </div>
-                <p className="text-2xl font-bold text-purple-900">
+                <p className="text-xl sm:text-2xl font-bold text-purple-900">
                   ${dailyData.length > 0 ? (totalProfit / dailyData.length).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
                 </p>
                 <p className="text-xs text-purple-700 mt-1">
@@ -151,25 +151,25 @@ export default function DailyProfitLossBar() {
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-gray-900"></div>
           </div>
         ) : hasData ? (
-          <div className="relative bg-white/20 rounded-xl p-6">
+          <div className="relative bg-white/20 rounded-xl p-3 sm:p-6">
             {/* Legend */}
-            <div className="flex items-center justify-center gap-6 mb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                <span className="text-xs font-medium text-gray-700">Revenue</span>
+            <div className="flex items-center justify-center gap-3 sm:gap-6 mb-3 sm:mb-4 flex-wrap">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-blue-500 rounded"></div>
+                <span className="text-[10px] sm:text-xs font-medium text-gray-700">Revenue</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-gradient-to-br from-green-500 to-green-600 rounded"></div>
-                <span className="text-xs font-medium text-gray-700">Profit</span>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-br from-green-500 to-green-600 rounded"></div>
+                <span className="text-[10px] sm:text-xs font-medium text-gray-700">Profit</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-gradient-to-br from-red-500 to-red-600 rounded"></div>
-                <span className="text-xs font-medium text-gray-700">Loss</span>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-br from-red-500 to-red-600 rounded"></div>
+                <span className="text-[10px] sm:text-xs font-medium text-gray-700">Loss</span>
               </div>
             </div>
 
             {/* Bar Chart Container */}
-            <div className="relative h-64 flex items-end gap-1 overflow-hidden pl-12 pr-2">
+            <div className="relative h-48 sm:h-64 flex items-end gap-0.5 sm:gap-1 overflow-x-auto pl-8 sm:pl-12 pr-1 sm:pr-2">
               {dailyData.map((day, index) => {
                 const revenueHeight = Math.min((day.revenue / maxValue) * 100, 100);
                 const profitHeight = Math.min((Math.abs(day.profit) / maxValue) * 100, 100);
