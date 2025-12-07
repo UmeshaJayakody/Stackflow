@@ -170,3 +170,30 @@ StackFlow Team
     throw error;
   }
 }
+
+// General email sending function
+export async function sendEmail(options: {
+  to: string;
+  subject: string;
+  html?: string;
+  text?: string;
+  from?: string;
+}) {
+  const { to, subject, html, text, from } = options;
+
+  const mailOptions = {
+    from: from || process.env.EMAIL_FROM || process.env.EMAIL_USER,
+    to,
+    subject,
+    html,
+    text,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw error;
+  }
+}

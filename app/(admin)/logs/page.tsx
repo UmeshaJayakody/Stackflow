@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../context/AuthContext';
-import LoadingDots from '../components/LoadingDots';
+import { useAuth } from '../../context/AuthContext';
+import LoadingDots from '../../components/LoadingDots';
 
 interface ActivityLog {
   logId: number;
@@ -102,8 +102,8 @@ export default function LogsPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <header className="bg-white/40 backdrop-blur-md shadow-lg border-b border-gray-200/50 pt-16">
         <div className="container mx-auto px-6 md:px-8 lg:px-12 py-6">
-          <div className="flex justify-between items-center">
-            <div>
+          <div className="flex justify-center items-center">
+            <div className="text-center">
               <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Activity Logs</h1>
               <p className="text-gray-600 mt-1">System audit trail and activity history</p>
             </div>

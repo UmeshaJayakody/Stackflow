@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect, Suspense, useId, useRef } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import toast, { Toaster } from 'react-hot-toast';
 import { cn } from '@/lib/utils';
-import LoadingDots from '../components/LoadingDots';
+import LoadingDots from '../../components/LoadingDots';
 
 interface AnimatedGridPatternProps {
   width?: number;
@@ -118,13 +118,13 @@ export function AnimatedGridPattern({
           y={y}
         >
           <path
-            d={"M.5 " + height + "V.5H" + width}
+            d={`M.5 ${height}V.5H${width}`}
             fill="none"
             strokeDasharray={strokeDasharray}
           />
         </pattern>
       </defs>
-      <rect width="100%" height="100%" fill={"url(#" + id + ")"} />
+      <rect width="100%" height="100%" fill={`url(#${id})`} />
       <svg x={x} y={y} className="overflow-visible">
         {squares.map(({ pos: [x, y], id }, index) => (
           <motion.rect
@@ -137,7 +137,7 @@ export function AnimatedGridPattern({
               repeatType: "reverse",
             }}
             onAnimationComplete={() => updateSquarePosition(id)}
-            key={x + "-" + y + "-" + index}
+            key={`${x}-${y}-${index}`}
             width={width - 1}
             height={height - 1}
             x={x * width + 1}
@@ -151,22 +151,12 @@ export function AnimatedGridPattern({
   );
 }
 
-function ResetPasswordForm() {
+export default function ForgotPasswordPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get('token');
-
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (!token) {
-      setError('Invalid reset link. Please request a new password reset.');
-    }
-  }, [token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -174,38 +164,22 @@ function ResetPasswordForm() {
     setError('');
     setMessage('');
 
-    // Validation
-    if (newPassword.length < 6) {
-      setError('Password must be at least 6 characters long');
-      setLoading(false);
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
-      return;
-    }
-
     try {
-      const response = await fetch('/api/auth/reset-password', {
+      const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, newPassword }),
+        body: JSON.stringify({ email }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        toast.success('Password reset successfully!');
-        setNewPassword('');
-        setConfirmPassword('');
-        // Redirect to login after 2 seconds
+        toast.success('Password reset email sent successfully!');
         setTimeout(() => {
           router.push('/login');
         }, 2000);
       } else {
-        setError(data.error || 'Failed to reset password');
+        setError(data.error || 'Failed to send reset email');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -293,7 +267,7 @@ function ResetPasswordForm() {
       </div>
 
       {/* Animated Grid Pattern */}
-      {/* <AnimatedGridPattern className="z-0" /> */}
+      <AnimatedGridPattern className="z-0" />
 
       <div className="relative z-10 h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-md">
@@ -311,43 +285,23 @@ function ResetPasswordForm() {
                 height={40}
                 className="mx-auto mb-4"
               />
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Reset Password</h2>
-              <p className="text-gray-600">Enter your new password below</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Forgot Password</h2>
+              <p className="text-gray-600">Enter your email to reset your password</p>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="relative z-10 space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
                 <div className="relative">
                   <svg className="absolute left-4 top-4 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                   </svg>
                   <input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-12 pr-4 py-4 bg-white/50 backdrop-blur-sm border rounded-xl text-gray-900 placeholder-gray-500 focus:bg-white/70 focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 shadow-sm border-black/20 hover:border-black/30"
-                    placeholder="Enter new password"
-                    required
-                    minLength={6}
-                  />
-                </div>
-                <p className="text-xs text-gray-500 mt-1">Must be at least 6 characters</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
-                <div className="relative">
-                  <svg className="absolute left-4 top-4 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full pl-12 pr-4 py-4 bg-white/50 backdrop-blur-sm border rounded-xl text-gray-900 placeholder-gray-500 focus:bg-white/70 focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 shadow-sm border-black/20 hover:border-black/30"
-                    placeholder="Confirm new password"
+                    placeholder="name@email.com"
                     required
                   />
                 </div>
@@ -361,15 +315,17 @@ function ResetPasswordForm() {
 
               <button
                 type="submit"
-                disabled={loading || !token}
+                disabled={loading}
                 className="group relative w-full overflow-hidden"
               >
                 <div className="w-full flex items-center justify-center px-6 py-4 bg-gray-900 text-white rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-gray-900/30 disabled:opacity-50 disabled:cursor-not-allowed group-hover:scale-[1.02]">
                   {loading ? (
-                    <LoadingDots />
+                    <>
+                      <LoadingDots />
+                    </>
                   ) : (
                     <>
-                      Reset Password
+                      Send Reset Link
                       <svg className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                       </svg>
@@ -390,13 +346,5 @@ function ResetPasswordForm() {
       </div>
       <Toaster />
     </div>
-  );
-}
-
-export default function ResetPasswordPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><LoadingDots /></div>}>
-      <ResetPasswordForm />
-    </Suspense>
   );
 }

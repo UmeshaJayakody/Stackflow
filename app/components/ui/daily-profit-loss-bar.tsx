@@ -83,7 +83,7 @@ export default function DailyProfitLossBar() {
           {/* Summary Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6">
             {/* Total Revenue */}
-            <div className="relative bg-gradient-to-br from-blue-50/80 to-blue-100/40 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-blue-200/50 overflow-hidden">
+            <div className="relative bg-gradient-to-br from-blue-50/80 to-blue-100/40 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-blue-200/50 overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300">
               <div className="absolute top-0 right-0 w-20 h-20 bg-blue-400/10 rounded-full -mr-10 -mt-10"></div>
               <div className="relative">
                 <div className="flex items-center gap-2 mb-2">
@@ -100,7 +100,7 @@ export default function DailyProfitLossBar() {
             </div>
 
             {/* Total Profit */}
-            <div className={`relative bg-gradient-to-br ${totalProfit >= 0 ? 'from-green-50/80 to-green-100/40' : 'from-red-50/80 to-red-100/40'} backdrop-blur-sm rounded-xl p-3 sm:p-4 border ${totalProfit >= 0 ? 'border-green-200/50' : 'border-red-200/50'} overflow-hidden`}>
+            <div className={`relative bg-gradient-to-br ${totalProfit >= 0 ? 'from-green-50/80 to-green-100/40' : 'from-red-50/80 to-red-100/40'} backdrop-blur-sm rounded-xl p-3 sm:p-4 border ${totalProfit >= 0 ? 'border-green-200/50' : 'border-red-200/50'} overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300`}>
               <div className={`absolute top-0 right-0 w-20 h-20 ${totalProfit >= 0 ? 'bg-green-400/10' : 'bg-red-400/10'} rounded-full -mr-10 -mt-10`}></div>
               <div className="relative">
                 <div className="flex items-center gap-2 mb-2">
@@ -126,7 +126,7 @@ export default function DailyProfitLossBar() {
             </div>
 
             {/* Average Daily Profit */}
-            <div className="relative bg-gradient-to-br from-purple-50/80 to-purple-100/40 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-purple-200/50 overflow-hidden">
+            <div className="relative bg-gradient-to-br from-purple-50/80 to-purple-100/40 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-purple-200/50 overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300">
               <div className="absolute top-0 right-0 w-20 h-20 bg-purple-400/10 rounded-full -mr-10 -mt-10"></div>
               <div className="relative">
                 <div className="flex items-center gap-2 mb-2">

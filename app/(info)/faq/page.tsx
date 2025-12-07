@@ -110,12 +110,12 @@ export default function FAQPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white pt-16 sm:pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-16 sm:pt-20">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-200/50">
         <div className="container mx-auto px-4 py-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Frequently Asked Questions</h1>
+          <div className="text-center">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Frequently Asked Questions</h1>
             <p className="text-gray-600 mt-1">Find answers to common questions about StackFlow</p>
           </div>
         </div>
@@ -131,7 +131,7 @@ export default function FAQPage() {
               placeholder="Search FAQs..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border border-gray-900 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+              className="w-full pl-12 pr-4 py-3 bg-white/80 border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:bg-white/90 transition-all duration-300 placeholder-gray-400"
             />
           </div>
         </div>
@@ -142,7 +142,7 @@ export default function FAQPage() {
             <button
               key={category}
               onClick={() => setSearchTerm(category)}
-              className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:border-gray-900 hover:shadow-sm transition-all text-sm font-medium text-gray-700 hover:text-gray-900"
+              className="px-4 py-2 bg-white/70 backdrop-blur-sm border border-gray-200/50 rounded-lg hover:border-blue-300/70 hover:shadow-md hover:bg-white/90 transition-all duration-300 text-sm font-medium text-gray-700 hover:text-blue-700"
             >
               {category}
             </button>
@@ -152,12 +152,12 @@ export default function FAQPage() {
         {/* FAQ Items */}
         <div className="space-y-4">
           {filteredFaqs.length === 0 ? (
-            <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="text-center py-12 bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200/50">
               <HelpCircle className="w-12 h-12 text-gray-400 mx-auto mb-3" />
               <p className="text-gray-600">No FAQs found matching your search.</p>
               <button
                 onClick={() => setSearchTerm('')}
-                className="mt-4 text-sm text-gray-900 hover:underline"
+                className="mt-4 text-sm text-blue-600 hover:text-blue-700 hover:underline transition-colors"
               >
                 Clear search
               </button>
@@ -166,26 +166,26 @@ export default function FAQPage() {
             filteredFaqs.map((faq, index) => (
               <div
                 key={index}
-                className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow"
+                className="bg-white/70 backdrop-blur-sm border border-gray-200/50 rounded-xl overflow-hidden hover:shadow-lg hover:border-blue-200/50 transition-all duration-300"
               >
                 <button
                   onClick={() => toggleFaq(index)}
-                  className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+                  className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-white/90 transition-colors"
                 >
                   <div className="flex-1">
-                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
                       {faq.category}
                     </span>
                     <h3 className="text-lg font-semibold text-gray-900 mt-1">{faq.question}</h3>
                   </div>
                   {openIndex === index ? (
-                    <ChevronUp className="w-5 h-5 text-gray-900 flex-shrink-0 ml-4" />
+                    <ChevronUp className="w-5 h-5 text-blue-600 flex-shrink-0 ml-4" />
                   ) : (
                     <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0 ml-4" />
                   )}
                 </button>
                 {openIndex === index && (
-                  <div className="px-6 pb-4 pt-2 border-t border-gray-100">
+                  <div className="px-6 pb-4 pt-2 border-t border-gray-200/50 bg-gradient-to-r from-blue-50/30 to-purple-50/30">
                     <p className="text-gray-700 leading-relaxed">{faq.answer}</p>
                   </div>
                 )}
@@ -195,13 +195,14 @@ export default function FAQPage() {
         </div>
 
         {/* Contact Support */}
-        <div className="mt-12 bg-gray-50 border border-gray-200 rounded-xl p-8 text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Still have questions?</h2>
+        <div className="mt-12 bg-white/70 backdrop-blur-sm border border-gray-200/50 rounded-xl p-8 text-center shadow-lg hover:shadow-xl transition-all duration-300">
+          <h2 className="text-xl font-semibold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">Still have questions?</h2>
           <p className="text-gray-600 mb-4">Can't find the answer you're looking for? Please reach out to our support team.</p>
           <Link
             href="/support"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
+            className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-green-600 to-green-600 hover:from-green-700 hover:to-green-700 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 font-medium"
           >
+            <Home className="w-5 h-5" />
             Contact Support
           </Link>
         </div>

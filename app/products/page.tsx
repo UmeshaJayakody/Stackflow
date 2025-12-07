@@ -1,10 +1,19 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import LoadingDots from '../components/LoadingDots';
+import ProductDetailsModal from './components/ProductDetailsModal';
+import PurchaseModal from './components/PurchaseModal';
+import SaleModal from './components/SaleModal';
+import AddSupplierModal from './components/AddSupplierModal';
+import AddCustomerModal from './components/AddCustomerModal';
+import AddProductModal from './components/AddProductModal';
+import DeleteConfirmationModal from './components/DeleteConfirmationModal';
+import EditProductModal from './components/EditProductModal';
+import ProductsTable from './components/ProductsTable';
 
 interface Product {
   productId: number;
@@ -78,6 +87,8 @@ export default function ProductsPage() {
   const [showAddProductModal, setShowAddProductModal] = useState(false);
   const [showEditProductModal, setShowEditProductModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [editProductForm, setEditProductForm] = useState({
     productId: 0,
     productName: '',
@@ -95,13 +106,11 @@ export default function ProductsPage() {
     sku: '',
     category: '',
     unitPrice: '',
-    quantity: '0',
     minimumQuantity: '0',
     maximumQuantity: '0',
     warehouseId: '',
     supplierId: '',
   });
-  const qrCodeRef = useRef<HTMLCanvasElement>(null);
 
   // Calculate if product is low stock (current <= min + 10% of range)
   const isLowStock = (product: Product) => {
@@ -205,11 +214,17 @@ export default function ProductsPage() {
   };
 
   const handleDelete = async (product: Product) => {
-    if (!confirm(`Delete ${product.productName}? This will create a sale record for ${product.quantity} units at $0.`)) return;
+    setProductToDelete(product);
+    setShowDeleteModal(true);
+  };
 
+  const confirmDelete = async () => {
+    if (!productToDelete) return;
+
+    setIsLoading(true);
     try {
       // Create a sale for all quantity at $0 before deleting
-      if (product.quantity > 0 && customers.length > 0) {
+      if (productToDelete.quantity > 0 && customers.length > 0) {
         await fetch('/api/sales', {
           method: 'POST',
           headers: { 
@@ -218,15 +233,15 @@ export default function ProductsPage() {
           },
           body: JSON.stringify({
             customerId: customers[0].customerId, // Use first customer
-            productId: product.productId,
-            soldQuantity: product.quantity,
+            productId: productToDelete.productId,
+            soldQuantity: productToDelete.quantity,
             salePrice: 0,
             createdBy: user?.userId,
           }),
         });
       }
 
-      const response = await fetch(`/api/products/${product.productId}`, {
+      const response = await fetch(`/api/products/${productToDelete.productId}`, {
         method: 'DELETE',
         headers: {
           'x-user-id': user?.userId.toString() || '',
@@ -237,12 +252,16 @@ export default function ProductsPage() {
       if (result.success) {
         alert('Product deleted successfully with sale record created');
         fetchProducts();
+        setShowDeleteModal(false);
+        setProductToDelete(null);
       } else {
         alert('Failed to delete product: ' + result.error);
       }
     } catch (error) {
       console.error('Error deleting product:', error);
       alert('An error occurred while deleting the product');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -364,77 +383,8 @@ export default function ProductsPage() {
   const openProductDetails = (product: Product) => {
     setSelectedProduct(product);
     setShowDetailPopup(true);
-    // Generate QR code after popup opens
-    setTimeout(() => generateQRCode(product.sku), 100);
     // Fetch stock batches for this product
     fetchStockBatches(product.productId);
-  };
-
-  const generateQRCode = async (sku: string) => {
-    const canvas = qrCodeRef.current;
-    if (!canvas) return;
-
-    const QRCode = (await import('qrcode')).default;
-    try {
-      await QRCode.toCanvas(canvas, sku, {
-        width: 200,
-        margin: 2,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF',
-        },
-      });
-    } catch (error) {
-      console.error('Error generating QR code:', error);
-    }
-  };
-
-  const downloadQRCode = () => {
-    const canvas = qrCodeRef.current;
-    if (!canvas || !selectedProduct) return;
-
-    const url = canvas.toDataURL('image/png');
-    const link = document.createElement('a');
-    link.download = `${selectedProduct.sku}-qrcode.png`;
-    link.href = url;
-    link.click();
-  };
-
-  const shareQRCode = async () => {
-    const canvas = qrCodeRef.current;
-    if (!canvas || !selectedProduct) return;
-
-    try {
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
-        
-        const file = new File([blob], `${selectedProduct.sku}-qrcode.png`, { type: 'image/png' });
-        
-        if (navigator.share && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            title: `QR Code - ${selectedProduct.productName}`,
-            text: `SKU: ${selectedProduct.sku}`,
-            files: [file],
-          });
-        } else {
-          // Fallback: copy to clipboard or download
-          canvas.toBlob(async (blob) => {
-            if (blob && navigator.clipboard) {
-              await navigator.clipboard.write([
-                new ClipboardItem({ 'image/png': blob })
-              ]);
-              alert('QR code copied to clipboard!');
-            } else {
-              downloadQRCode();
-            }
-          });
-        }
-      });
-    } catch (error) {
-      console.error('Error sharing QR code:', error);
-      alert('Unable to share. QR code will be downloaded instead.');
-      downloadQRCode();
-    }
   };
 
   const openPurchaseModal = () => {
@@ -471,12 +421,20 @@ export default function ProductsPage() {
         const newSupplier = await response.json();
         await fetchSuppliers();
         setShowAddSupplierModal(false);
-        setShowPurchaseModal(true);
-        // Set the newly created supplier as selected
+        if (showPurchaseModal) {
+          setShowPurchaseModal(true);
+        } else {
+          setShowAddProductModal(true);
+        }
+        // Set the newly created supplier as selected in the appropriate modal
         setTimeout(() => {
-          const selectElement = document.getElementById('supplierId') as HTMLSelectElement;
+          const selectElement = document.querySelector('select[name="supplierId"]') as HTMLSelectElement;
           if (selectElement) {
             selectElement.value = newSupplier.supplierId.toString();
+            // Update the form state if we're in add product modal
+            if (showAddProductModal) {
+              setNewProductForm(prev => ({ ...prev, supplierId: newSupplier.supplierId.toString() }));
+            }
           }
         }, 100);
       } else {
@@ -486,6 +444,16 @@ export default function ProductsPage() {
       console.error('Error adding supplier:', error);
       alert('An error occurred');
     }
+  };
+
+  const handleAddWarehouse = () => {
+    // Navigate to warehouse management page
+    window.location.href = '/warehouses';
+  };
+
+  const handleAddSupplierFromProduct = () => {
+    setShowAddProductModal(false);
+    setShowAddSupplierModal(true);
   };
 
   const handleAddCustomer = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -541,7 +509,6 @@ export default function ProductsPage() {
         body: JSON.stringify({
           ...newProductForm,
           unitPrice: parseFloat(newProductForm.unitPrice),
-          quantity: parseInt(newProductForm.quantity),
           minimumQuantity: parseInt(newProductForm.minimumQuantity),
           maximumQuantity: parseInt(newProductForm.maximumQuantity),
           warehouseId: parseInt(newProductForm.warehouseId),
@@ -557,7 +524,6 @@ export default function ProductsPage() {
           sku: '',
           category: '',
           unitPrice: '',
-          quantity: '0',
           minimumQuantity: '0',
           maximumQuantity: '0',
           warehouseId: '',
@@ -638,20 +604,12 @@ export default function ProductsPage() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="bg-white/40 backdrop-blur-md shadow-lg border-b border-gray-200/50 pt-16">
+      <header className="bg-white/40 backdrop-blur-md shadow-2xl border-b border-gray-200/50 pt-16">
         <div className="container mx-auto px-6 md:px-8 lg:px-12 py-6">
-          <div className="flex justify-between items-center">
-            <div>
+          <div className="flex justify-center items-center">
+            <div className="text-center">
               <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Products</h1>
               <p className="text-gray-600 mt-1">Manage your inventory</p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowAddProductModal(true)}
-                className="px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-gray-900 to-gray-800 rounded-lg hover:from-gray-800 hover:to-gray-700 shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                + Add Product
-              </button>
             </div>
           </div>
         </div>
@@ -659,7 +617,19 @@ export default function ProductsPage() {
 
       <main className="container mx-auto px-6 md:px-8 lg:px-12 py-8">
         {/* Filters */}
-        <div className="bg-white/60 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 p-6 mb-6">
+        <div className="bg-gradient-to-br from-blue-50/60 to-cyan-50/40 backdrop-blur-md rounded-2xl shadow-2xl hover:shadow-3xl border border-blue-200/50 p-6 mb-6 transition-shadow duration-300">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+            <h3 className="text-lg font-semibold text-blue-900">Filter Products</h3>
+            <button
+              onClick={() => setShowAddProductModal(true)}
+              className="px-6 py-2.5 text-sm font-medium text-white bg-blue-600/80 backdrop-blur-sm rounded-lg hover:bg-blue-700/90 shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center gap-2 border border-blue-500/30"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Product
+            </button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -731,1076 +701,138 @@ export default function ProductsPage() {
         </div>
 
         {/* Products Table */}
-        <div className="bg-white/60 backdrop-blur-md border border-gray-200/50 rounded-2xl shadow-xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200/50 bg-gradient-to-r from-gray-900 to-gray-800">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white/60 backdrop-blur-md border border-gray-200/50 rounded-2xl shadow-2xl hover:shadow-3xl overflow-hidden transition-shadow duration-300">
+            <div className="px-6 py-4 border-b border-gray-200/50 bg-blue-600/90">
+            <h2 className="text-xl font-bold text-white flex items-center gap-3">
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-md bg-blue-600/80 backdrop-blur-sm shadow-3xl shadow-blue-600/50 ring-4 ring-blue-100/30 border border-blue-500/30">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
-              All Products ({products.length})
+              </span>
+              <span>All Products ({products.length})</span>
             </h2>
-          </div>
+            </div>
           
-          {loading ? (
-            <div className="text-center py-12 bg-white/40">
-              <LoadingDots />
-            </div>
-          ) : products.length === 0 ? (
-            <div className="text-center py-12 bg-white/40">
-              <p className="text-gray-700 font-semibold">No products found</p>
-              <Link
-                href="/products/new"
-                className="mt-4 inline-block px-4 py-2 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl hover:from-gray-800 hover:to-gray-700 font-semibold shadow-lg transition-all duration-300"
-              >
-                Add Your First Product
-              </Link>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-900">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                      Product
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                      SKU
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                      Category
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                      Supplier
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                      Price
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                      Stock
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                      Warehouse
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                      Recorded By
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white/80 divide-y divide-gray-200">
-                  {products.map((product) => (
-                    <tr 
-                      key={product.productId} 
-                      className="hover:bg-gray-100/80 cursor-pointer transition-all duration-200"
-                      onClick={() => openProductDetails(product)}
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-bold text-gray-900">
-                          {product.productName}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-semibold text-gray-700">{product.sku}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-3 py-1 text-xs font-bold bg-gray-200 text-gray-900 rounded-full">
-                          {product.category || 'N/A'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-semibold text-gray-900">{product.supplier?.supplierName || 'N/A'}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-bold text-gray-900">
-                          ${Number(product.unitPrice).toFixed(2)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex flex-col">
-                          <span
-                            className={`px-2 inline-flex text-xs leading-5 font-bold rounded-full ${
-                              isLowStock(product)
-                                ? 'bg-gray-800 text-white'
-                                : 'bg-gray-300 text-gray-900'
-                            }`}
-                          >
-                            {product.quantity} units
-                          </span>
-                          {isLowStock(product) && (
-                            <span className="text-xs text-gray-700 mt-1 font-semibold">Low Stock!</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                        {product.warehouse?.warehouseName || 'N/A'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-700">
-                        {product.creator?.fullName || 'System'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={(e) => { 
-                              e.stopPropagation(); 
-                              setEditProductForm({
-                                productId: product.productId,
-                                productName: product.productName,
-                                sku: product.sku,
-                                category: product.category || '',
-                                unitPrice: product.unitPrice.toString(),
-                                quantity: product.quantity.toString(),
-                                minimumQuantity: product.minimumQuantity.toString(),
-                                maximumQuantity: product.maximumQuantity.toString(),
-                                warehouseId: product.warehouse?.warehouseId.toString() || '',
-                                supplierId: product.supplier?.supplierId.toString() || '',
-                              });
-                              setShowEditProductModal(true);
-                            }}
-                            className="px-3 py-1.5 bg-gradient-to-r from-gray-700 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-500 font-semibold text-xs shadow-md transition-all duration-300"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleDelete(product); }}
-                            className="px-3 py-1.5 bg-gradient-to-r from-gray-800 to-black text-white rounded-lg hover:from-black hover:to-gray-900 font-semibold text-xs shadow-md transition-all duration-300"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <ProductsTable
+            products={products}
+            loading={loading}
+            isLowStock={isLowStock}
+            onProductClick={openProductDetails}
+            onEdit={(product) => {
+              setEditProductForm({
+                productId: product.productId,
+                productName: product.productName,
+                sku: product.sku,
+                category: product.category || '',
+                unitPrice: product.unitPrice.toString(),
+                quantity: product.quantity.toString(),
+                minimumQuantity: product.minimumQuantity.toString(),
+                maximumQuantity: product.maximumQuantity.toString(),
+                warehouseId: product.warehouse?.warehouseId.toString() || '',
+                supplierId: product.supplier?.supplierId.toString() || '',
+              });
+              setShowEditProductModal(true);
+            }}
+            onDelete={handleDelete}
+          />
         </div>
       </main>
 
-      {/* Product Details Popup */}
+      {/* Modals */}
       {showDetailPopup && selectedProduct && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden border-2 border-gray-300/50">
-            <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 p-6">
-              <div className="flex justify-between items-start">
-                <h2 className="text-2xl font-bold text-white">{selectedProduct.productName}</h2>
-                <button
-                  onClick={() => { setShowDetailPopup(false); setSelectedProduct(null); }}
-                  className="text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300"
-                  title="Close"
-                  aria-label="Close popup"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-88px)]">
-
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                  <p className="text-sm text-gray-600 font-medium mb-1">SKU</p>
-                  <p className="text-lg font-bold text-gray-900">{selectedProduct.sku}</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                  <p className="text-sm text-gray-600 font-medium mb-1">Category</p>
-                  <p className="text-lg font-bold text-gray-900">{selectedProduct.category || 'N/A'}</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                  <p className="text-sm text-gray-600 font-medium mb-1">Unit Price</p>
-                  <p className="text-lg font-bold text-gray-900">${Number(selectedProduct.unitPrice).toFixed(2)}</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                  <p className="text-sm text-gray-600 font-medium mb-1">Current Stock</p>
-                  <p className={`text-lg font-bold ${isLowStock(selectedProduct) ? 'text-gray-900' : 'text-gray-900'}`}>
-                    {selectedProduct.quantity} units
-                    {isLowStock(selectedProduct) && <span className="text-sm ml-2 text-gray-600">(Low Stock!)</span>}
-                  </p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                  <p className="text-sm text-gray-600 font-medium mb-1">Minimum Quantity</p>
-                  <p className="text-lg font-bold text-gray-900">{selectedProduct.minimumQuantity}</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                  <p className="text-sm text-gray-600 font-medium mb-1">Maximum Quantity</p>
-                  <p className="text-lg font-bold text-gray-900">{selectedProduct.maximumQuantity}</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                  <p className="text-sm text-gray-600 font-medium mb-1">Warehouse</p>
-                  <p className="text-lg font-bold text-gray-900">{selectedProduct.warehouse?.warehouseName || 'N/A'}</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                  <p className="text-sm text-gray-600 font-medium mb-1">Supplier</p>
-                  <p className="text-lg font-bold text-gray-900">{selectedProduct.supplier?.supplierName || 'N/A'}</p>
-                </div>
-              </div>
-
-              <div className="border-t pt-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Product QR Code</h3>
-                <div className="flex flex-col items-center mb-6 bg-gray-50 rounded-xl p-6 border border-gray-200">
-                  <canvas ref={qrCodeRef} className="border-2 border-gray-300 rounded-lg mb-4"></canvas>
-                  <p className="text-sm font-semibold text-gray-700 mb-4">SKU: {selectedProduct.sku}</p>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={downloadQRCode}
-                      className="px-4 py-2 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg hover:from-gray-800 hover:to-gray-700 font-semibold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                      Download
-                    </button>
-                    <button
-                      onClick={shareQRCode}
-                      className="px-4 py-2 bg-gradient-to-r from-gray-700 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-500 font-semibold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300"
-                    >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                    </svg>
-                    Share
-                  </button>
-                </div>
-              </div>
-
-                <h3 className="text-lg font-bold text-gray-900 mb-4 border-t pt-4">Stock Batches (FIFO)</h3>
-                <div className="mb-6">
-                  {stockBatches.length > 0 ? (
-                    <div className="overflow-x-auto bg-white rounded-xl border border-gray-200">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-900">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Batch Date
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Supplier
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Purchase Price
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Qty In
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Remaining
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {stockBatches.map((batch) => (
-                          <tr key={batch.batchId}>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                              {new Date(batch.batchDate).toLocaleDateString()}
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                              {batch.purchase.supplier.supplierName}
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                              ${parseFloat(batch.purchasePrice.toString()).toFixed(2)}
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                              {batch.quantityIn}
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">
-                              {batch.quantityRemaining}
-                            </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm">
-                              {batch.quantityRemaining === 0 ? (
-                                <span className="px-2 py-1 bg-gray-300 text-gray-800 rounded-full text-xs font-bold">
-                                  Depleted
-                                </span>
-                              ) : batch.quantityRemaining < batch.quantityIn ? (
-                                <span className="px-2 py-1 bg-gray-600 text-white rounded-full text-xs font-bold">
-                                  Partial
-                                </span>
-                              ) : (
-                                <span className="px-2 py-1 bg-gray-900 text-white rounded-full text-xs font-bold">
-                                  Available
-                                </span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-center py-4 bg-gray-50 rounded">No stock batches found</p>
-                )}
-              </div>
-
-                <h3 className="text-lg font-bold text-gray-900 mb-4 border-t pt-4">Actions</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <button
-                    onClick={openPurchaseModal}
-                    className="px-6 py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl hover:from-gray-800 hover:to-gray-700 font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-                  >
-                    Record Purchase
-                  </button>
-                  <button
-                    onClick={openSaleModal}
-                    className="px-6 py-3 bg-gradient-to-r from-gray-700 to-gray-600 text-white rounded-xl hover:from-gray-600 hover:to-gray-500 font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-                  >
-                    Record Sale
-                  </button>
-                  <button
-                    onClick={() => { handleDelete(selectedProduct); setShowDetailPopup(false); setSelectedProduct(null); }}
-                    className="px-6 py-3 bg-gradient-to-r from-gray-800 to-black text-white rounded-xl hover:from-black hover:to-gray-900 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 col-span-2"
-                  >
-                    Delete Product
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ProductDetailsModal
+          product={selectedProduct}
+          stockBatches={stockBatches}
+          onClose={() => { setShowDetailPopup(false); setSelectedProduct(null); }}
+          onDelete={handleDelete}
+          onOpenPurchase={openPurchaseModal}
+          onOpenSale={openSaleModal}
+          onEdit={(product) => {
+            setEditProductForm({
+              productId: product.productId,
+              productName: product.productName,
+              sku: product.sku,
+              category: product.category || '',
+              unitPrice: product.unitPrice.toString(),
+              quantity: product.quantity.toString(),
+              minimumQuantity: product.minimumQuantity.toString(),
+              maximumQuantity: product.maximumQuantity.toString(),
+              warehouseId: product.warehouse?.warehouseId.toString() || '',
+              supplierId: product.supplier?.supplierId.toString() || '',
+            });
+            setShowEditProductModal(true);
+          }}
+          isLowStock={isLowStock}
+        />
       )}
 
-      {/* Purchase Modal */}
       {showPurchaseModal && selectedProduct && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full border-2 border-gray-300/50">
-            <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 p-6 rounded-t-3xl">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                Record Purchase
-              </h2>
-              <p className="text-gray-300 mt-1">Product: <span className="font-bold">{selectedProduct.productName}</span></p>
-            </div>
-            
-            <form onSubmit={handlePurchaseSubmit} className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="supplierId" className="block text-sm font-bold text-gray-900 mb-2">
-                    Supplier *
-                  </label>
-                  <div className="flex gap-2">
-                    <select
-                      id="supplierId"
-                      name="supplierId"
-                      required
-                      defaultValue={selectedProduct.supplier?.supplierId || ''}
-                      className="flex-1 px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                    >
-                      <option value="">Select Supplier</option>
-                      {suppliers.map((supplier) => (
-                        <option key={supplier.supplierId} value={supplier.supplierId}>
-                          {supplier.supplierName}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => { setShowPurchaseModal(false); setShowAddSupplierModal(true); }}
-                      className="px-4 py-2.5 bg-gradient-to-r from-gray-700 to-gray-600 text-white rounded-xl hover:from-gray-600 hover:to-gray-500 font-semibold whitespace-nowrap shadow-lg transition-all duration-300"
-                      title="Add New Supplier"
-                    >
-                      + Add
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="quantity" className="block text-sm font-bold text-gray-900 mb-2">
-                    Quantity *
-                  </label>
-                  <input
-                    type="number"
-                    id="quantity"
-                    name="quantity"
-                    required
-                    min="1"
-                    defaultValue="1"
-                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="price" className="block text-sm font-bold text-gray-900 mb-2">
-                    Purchase Price (per unit) *
-                  </label>
-                  <input
-                    type="number"
-                    id="price"
-                    name="price"
-                    required
-                    step="0.01"
-                    min="0"
-                    defaultValue={Number(selectedProduct.unitPrice).toFixed(2)}
-                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 mt-6">
-                <button
-                  type="submit"
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:from-black hover:to-gray-900 font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
-                >
-                  Record Purchase
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setShowPurchaseModal(false); setShowDetailPopup(true); }}
-                  className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 font-semibold transition-all duration-300"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <PurchaseModal
+          product={selectedProduct}
+          suppliers={suppliers}
+          onClose={() => { setShowPurchaseModal(false); setShowDetailPopup(true); }}
+          onSubmit={handlePurchaseSubmit}
+          onAddSupplier={() => { setShowPurchaseModal(false); setShowAddSupplierModal(true); }}
+        />
       )}
 
-      {/* Sale Modal */}
       {showSaleModal && selectedProduct && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full border-2 border-gray-300/50">
-            <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 p-6 rounded-t-3xl">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                Record Sale
-              </h2>
-              <div className="flex items-center justify-between mt-2">
-                <p className="text-gray-300">Product: <span className="font-bold">{selectedProduct.productName}</span></p>
-                <p className="text-sm text-gray-300">Stock: <span className="font-bold">{selectedProduct.quantity}</span></p>
-              </div>
-            </div>
-            
-            <form onSubmit={handleSaleSubmit} className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="customerId" className="block text-sm font-bold text-gray-900 mb-2">
-                    Customer *
-                  </label>
-                  <div className="flex gap-2">
-                    <select
-                      id="customerId"
-                      name="customerId"
-                      required
-                      className="flex-1 px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                    >
-                      <option value="">Select Customer</option>
-                      {customers.map((customer) => (
-                        <option key={customer.customerId} value={customer.customerId}>
-                          {customer.customerName}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => { setShowSaleModal(false); setShowAddCustomerModal(true); }}
-                      className="px-4 py-2.5 bg-gradient-to-r from-gray-700 to-gray-600 text-white rounded-xl hover:from-gray-600 hover:to-gray-500 font-semibold whitespace-nowrap shadow-lg transition-all duration-300"
-                      title="Add New Customer"
-                    >
-                      + Add
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="saleQuantity" className="block text-sm font-bold text-gray-900 mb-2">
-                    Quantity *
-                  </label>
-                  <input
-                    type="number"
-                    id="saleQuantity"
-                    name="quantity"
-                    required
-                    min="1"
-                    max={selectedProduct.quantity}
-                    defaultValue="1"
-                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="salePrice" className="block text-sm font-bold text-gray-900 mb-2">
-                    Sale Price (per unit) *
-                  </label>
-                  <input
-                    type="number"
-                    id="salePrice"
-                    name="price"
-                    required
-                    step="0.01"
-                    min="0"
-                    defaultValue={Number(selectedProduct.unitPrice).toFixed(2)}
-                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 mt-6">
-                <button
-                  type="submit"
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:from-black hover:to-gray-900 font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
-                >
-                  Record Sale
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setShowSaleModal(false); setShowDetailPopup(true); }}
-                  className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 font-semibold transition-all duration-300"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <SaleModal
+          product={selectedProduct}
+          customers={customers}
+          onClose={() => { setShowSaleModal(false); setShowDetailPopup(true); }}
+          onSubmit={handleSaleSubmit}
+          onAddCustomer={() => { setShowSaleModal(false); setShowAddCustomerModal(true); }}
+        />
       )}
 
-      {/* Add Supplier Modal */}
       {showAddSupplierModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[60] p-4">
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden border-2 border-gray-300/50">
-            <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 p-6 rounded-t-3xl">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-                Add New Supplier
-              </h2>
-              <p className="text-gray-300 mt-1">Create a new supplier account</p>
-            </div>
-            
-            <form onSubmit={handleAddSupplier} className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="supplierName" className="block text-sm font-bold text-gray-900 mb-2">
-                    Supplier Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="supplierName"
-                    name="supplierName"
-                    required
-                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="contactPerson" className="block text-sm font-bold text-gray-900 mb-2">
-                    Contact Person
-                  </label>
-                  <input
-                    type="text"
-                    id="contactPerson"
-                    name="contactPerson"
-                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-bold text-gray-900 mb-2">
-                    Phone
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="email" className="block text-sm font-bold text-gray-900 mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="address" className="block text-sm font-bold text-gray-900 mb-2">
-                    Address
-                  </label>
-                  <textarea
-                    id="address"
-                    name="address"
-                    rows={3}
-                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 mt-6">
-                <button
-                  type="submit"
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:from-black hover:to-gray-900 font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
-                >
-                  Add Supplier
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setShowAddSupplierModal(false); setShowPurchaseModal(true); }}
-                  className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 font-semibold transition-all duration-300"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <AddSupplierModal
+          onClose={() => { setShowAddSupplierModal(false); setShowPurchaseModal(true); }}
+          onSubmit={handleAddSupplier}
+        />
       )}
 
-      {/* Add Customer Modal */}
       {showAddCustomerModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[60] p-4">
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden border-2 border-gray-300/50">
-            <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 p-6 rounded-t-3xl">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                Add New Customer
-              </h2>
-              <p className="text-gray-300 mt-1">Create a new customer account</p>
-            </div>
-            
-            <form onSubmit={handleAddCustomer} className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="customerName" className="block text-sm font-bold text-gray-900 mb-2">
-                    Customer Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="customerName"
-                    name="customerName"
-                    required
-                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="customerPhone" className="block text-sm font-bold text-gray-900 mb-2">
-                    Phone
-                  </label>
-                  <input
-                    type="tel"
-                    id="customerPhone"
-                    name="phone"
-                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="customerEmail" className="block text-sm font-bold text-gray-900 mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="customerEmail"
-                    name="email"
-                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="customerAddress" className="block text-sm font-bold text-gray-900 mb-2">
-                    Address
-                  </label>
-                  <textarea
-                    id="customerAddress"
-                    name="address"
-                    rows={3}
-                    className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 mt-6">
-                <button
-                  type="submit"
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:from-black hover:to-gray-900 font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
-                >
-                  Add Customer
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setShowAddCustomerModal(false); setShowSaleModal(true); }}
-                  className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 font-semibold transition-all duration-300"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <AddCustomerModal
+          onClose={() => { setShowAddCustomerModal(false); setShowSaleModal(true); }}
+          onSubmit={handleAddCustomer}
+        />
       )}
 
-      {/* Add Product Modal */}
-      {showAddProductModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-3xl my-8 border-2 border-gray-300/50">
-            <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 p-6 rounded-t-3xl">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-                    </svg>
-                    Add New Product
-                  </h2>
-                  <p className="text-gray-300 mt-1">Create a new product in your inventory</p>
-                </div>
-                <button
-                  onClick={() => setShowAddProductModal(false)}
-                  className="text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300"
-                  title="Close modal"
-                  aria-label="Close add product modal"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
+      <AddProductModal
+        show={showAddProductModal}
+        form={newProductForm}
+        warehouses={warehouses}
+        suppliers={suppliers}
+        onClose={() => setShowAddProductModal(false)}
+        onSubmit={handleAddProduct}
+        onFormChange={setNewProductForm}
+        onAddSupplier={handleAddSupplierFromProduct}
+        onAddWarehouse={handleAddWarehouse}
+      />
 
-            <form onSubmit={handleAddProduct} className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[60vh] overflow-y-auto pr-2">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Product Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={newProductForm.productName}
-                    onChange={(e) => setNewProductForm({...newProductForm, productName: e.target.value})}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                    placeholder="Enter product name"
-                  />
-                </div>
+      <EditProductModal
+        show={showEditProductModal}
+        form={editProductForm}
+        warehouses={warehouses}
+        suppliers={suppliers}
+        isLoading={isLoading}
+        onClose={() => setShowEditProductModal(false)}
+        onSubmit={handleEditProduct}
+        onFormChange={setEditProductForm}
+      />
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    SKU *
-                  </label>
-                  <input
-                    type="text"
-                    value={newProductForm.sku}
-                    onChange={(e) => setNewProductForm({...newProductForm, sku: e.target.value})}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                    placeholder="e.g., PROD001"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Category
-                  </label>
-                  <input
-                    type="text"
-                    value={newProductForm.category}
-                    onChange={(e) => setNewProductForm({...newProductForm, category: e.target.value})}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                    placeholder="e.g., Electronics"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Unit Price ($) *
-                  </label>
-                  <input
-                    type="number"
-                    value={newProductForm.unitPrice}
-                    onChange={(e) => setNewProductForm({...newProductForm, unitPrice: e.target.value})}
-                    required
-                    step="0.01"
-                    min="0"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Warehouse *
-                  </label>
-                  <select
-                    value={newProductForm.warehouseId}
-                    onChange={(e) => setNewProductForm({...newProductForm, warehouseId: e.target.value})}
-                    required
-                    title="Select a warehouse"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  >
-                    <option value="">Select Warehouse</option>
-                    {warehouses.map((w) => (
-                      <option key={w.warehouseId} value={w.warehouseId}>{w.warehouseName}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Supplier *
-                  </label>
-                  <select
-                    value={newProductForm.supplierId}
-                    onChange={(e) => setNewProductForm({...newProductForm, supplierId: e.target.value})}
-                    required
-                    title="Select a supplier"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  >
-                    <option value="">Select Supplier</option>
-                    {suppliers.map((s) => (
-                      <option key={s.supplierId} value={s.supplierId}>{s.supplierName}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Current Quantity
-                  </label>
-                  <input
-                    type="number"
-                    value="0"
-                    disabled
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-100 text-gray-500 cursor-not-allowed transition-all"
-                    title="Quantity is managed through purchases and sales"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Updated via purchases</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Minimum Quantity
-                  </label>
-                  <input
-                    type="number"
-                    value={newProductForm.minimumQuantity}
-                    onChange={(e) => setNewProductForm({...newProductForm, minimumQuantity: e.target.value})}
-                    min="0"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Maximum Quantity
-                  </label>
-                  <input
-                    type="number"
-                    value={newProductForm.maximumQuantity}
-                    onChange={(e) => setNewProductForm({...newProductForm, maximumQuantity: e.target.value})}
-                    min="0"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-4 mt-6 pt-6 border-t border-gray-200">
-                <button
-                  type="submit"
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:from-black hover:to-gray-900 font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
-                >
-                  Create Product
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowAddProductModal(false)}
-                  className="px-6 py-3 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 font-semibold transition-all duration-300 shadow-md hover:shadow-lg"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Product Modal */}
-      {showEditProductModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden border-2 border-white/20 max-h-[calc(90vh-88px)]">
-            <div className="sticky top-0 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white p-6 flex justify-between items-center z-10">
-              <h2 className="text-2xl font-bold">Edit Product</h2>
-              <button
-                onClick={() => setShowEditProductModal(false)}
-                className="text-white/80 hover:text-white transition-colors"
-                aria-label="Close edit product modal"
-              >
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <form onSubmit={handleEditProduct} className="p-6 overflow-y-auto max-h-[calc(90vh-176px)]">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Product Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={editProductForm.productName}
-                    onChange={(e) => setEditProductForm({...editProductForm, productName: e.target.value})}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    SKU *
-                  </label>
-                  <input
-                    type="text"
-                    value={editProductForm.sku}
-                    onChange={(e) => setEditProductForm({...editProductForm, sku: e.target.value})}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Category *
-                  </label>
-                  <input
-                    type="text"
-                    value={editProductForm.category}
-                    onChange={(e) => setEditProductForm({...editProductForm, category: e.target.value})}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Unit Price *
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={editProductForm.unitPrice}
-                    onChange={(e) => setEditProductForm({...editProductForm, unitPrice: e.target.value})}
-                    required
-                    min="0"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Warehouse *
-                  </label>
-                  <select
-                    value={editProductForm.warehouseId}
-                    onChange={(e) => setEditProductForm({...editProductForm, warehouseId: e.target.value})}
-                    required
-                    title="Select a warehouse"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  >
-                    <option value="">Select Warehouse</option>
-                    {warehouses.map((w) => (
-                      <option key={w.warehouseId} value={w.warehouseId}>{w.warehouseName}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Supplier *
-                  </label>
-                  <select
-                    value={editProductForm.supplierId}
-                    onChange={(e) => setEditProductForm({...editProductForm, supplierId: e.target.value})}
-                    required
-                    title="Select a supplier"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  >
-                    <option value="">Select Supplier</option>
-                    {suppliers.map((s) => (
-                      <option key={s.supplierId} value={s.supplierId}>{s.supplierName}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Current Quantity
-                  </label>
-                  <input
-                    type="number"
-                    value={editProductForm.quantity}
-                    disabled
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-100 text-gray-500 cursor-not-allowed transition-all"
-                    title="Quantity is managed through purchases and sales"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Updated via purchases/sales</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Minimum Quantity
-                  </label>
-                  <input
-                    type="number"
-                    value={editProductForm.minimumQuantity}
-                    onChange={(e) => setEditProductForm({...editProductForm, minimumQuantity: e.target.value})}
-                    min="0"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Maximum Quantity
-                  </label>
-                  <input
-                    type="number"
-                    value={editProductForm.maximumQuantity}
-                    onChange={(e) => setEditProductForm({...editProductForm, maximumQuantity: e.target.value})}
-                    min="0"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-4 mt-6 pt-6 border-t border-gray-200">
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:from-black hover:to-gray-900 font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? <LoadingDots /> : 'Update Product'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowEditProductModal(false)}
-                  disabled={isLoading}
-                  className="px-6 py-3 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 font-semibold transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        product={productToDelete}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setProductToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

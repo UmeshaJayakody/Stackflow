@@ -120,18 +120,22 @@ export default function FeaturedCrmDemoSection({ stats }: { stats: DashboardStat
   ];
 
   return (
-    <div className="w-full">
-      {/* Section Title */}
-      <div className="mb-4 sm:mb-6">
-        <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent mb-1 sm:mb-2">Inventory Overview</h2>
-        <p className="text-xs sm:text-sm text-gray-600">Real-time insights into your stock management</p>
-      </div>
+    <div className="w-full relative bg-white/40 backdrop-blur-md border border-gray-200/50 rounded-2xl p-4 sm:p-6 shadow-xl hover:shadow-2xl transition-shadow duration-300">
+      <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent"></div>
       
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-        {statCards.map((stat, index) => (
-          <StatCard key={index} {...stat} />
-        ))}
+      <div className="relative">
+        {/* Section Title */}
+        <div className="mb-4 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent mb-1 sm:mb-2">Inventory Overview</h2>
+          <p className="text-xs sm:text-sm text-gray-600">Real-time insights into your stock management</p>
+        </div>
+        
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+          {statCards.map((stat, index) => (
+            <StatCard key={index} {...stat} />
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -3,8 +3,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Package, Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Github } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function Footer() {
+  const { isAdmin } = useAuth();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -59,11 +61,13 @@ export default function Footer() {
                   Purchases
                 </Link>
               </li>
-              <li>
-                <Link href="/reports" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
-                  Reports
-                </Link>
-              </li>
+              {isAdmin && (
+                <li>
+                  <Link href="/reports" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
+                    Reports
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
 
@@ -71,16 +75,20 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-4 text-gray-900">Resources</h4>
             <ul className="space-y-2">
-              <li>
-                <Link href="/logs" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
-                  Activity Logs
-                </Link>
-              </li>
-              <li>
-                <Link href="/documentation" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
-                  Documentation
-                </Link>
-              </li>
+              {isAdmin && (
+                <li>
+                  <Link href="/logs" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
+                    Activity Logs
+                  </Link>
+                </li>
+              )}
+              {isAdmin && (
+                <li>
+                  <Link href="/documentation" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
+                    Documentation
+                  </Link>
+                </li>
+              )}
               <li>
                 <Link href="/support" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
                   Support
@@ -100,15 +108,15 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-gray-600 text-sm">
                 <Mail className="w-4 h-4" />
-                <span>support@stackflow.com</span>
+                <span>stackflow.team@gmail.com</span>
               </li>
               <li className="flex items-center gap-2 text-gray-400 text-sm">
                 <Phone className="w-4 h-4" />
-                <span>+1 (555) 123-4567</span>
+                <span>+94 77 123 4567</span>
               </li>
               <li className="flex items-center gap-2 text-gray-400 text-sm">
                 <MapPin className="w-4 h-4" />
-                <span>San Francisco, CA</span>
+                <span>Wakanda Road, Homagama.</span>
               </li>
             </ul>
             
@@ -137,15 +145,15 @@ export default function Footer() {
               © {currentYear} StackFlow. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
-              <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">
+              <Link href="/privacy-policy" className="text-gray-600 hover:text-gray-900 transition-colors">
                 Privacy Policy
-              </a>
-              <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">
+              </Link>
+              <Link href="/terms-of-service" className="text-gray-600 hover:text-gray-900 transition-colors">
                 Terms of Service
-              </a>
-              <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">
+              </Link>
+              <Link href="/cookie-policy" className="text-gray-600 hover:text-gray-900 transition-colors">
                 Cookie Policy
-              </a>
+              </Link>
             </div>
           </div>
         </div>

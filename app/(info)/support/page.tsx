@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Mail, Phone, MapPin, Send, Home, MessageSquare } from 'lucide-react';
-import LoadingDots from '../components/LoadingDots';
+import LoadingDots from '../../components/LoadingDots';
 
 export default function SupportPage() {
   const [loading, setLoading] = useState(false);
@@ -50,12 +50,12 @@ export default function SupportPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white pt-16 sm:pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-16 sm:pt-20">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-200/50">
         <div className="container mx-auto px-4 py-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Support</h1>
+          <div className="text-center">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Support</h1>
             <p className="text-gray-600 mt-1">Get help from our support team</p>
           </div>
         </div>
@@ -65,52 +65,58 @@ export default function SupportPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Contact Information */}
           <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Contact Information</h2>
+            <div className="bg-white/70 backdrop-blur-sm border border-gray-200/50 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-blue-600" />
+                Contact Information
+              </h2>
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <Mail className="w-5 h-5 text-gray-900 mt-1" />
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-50/50 hover:bg-blue-50/70 transition-colors">
+                  <Mail className="w-5 h-5 text-blue-600 mt-1" />
                   <div>
                     <h3 className="font-medium text-gray-900">Email</h3>
-                    <p className="text-sm text-gray-600">support@stackflow.com</p>
-                    <p className="text-xs text-gray-500 mt-1">Response within 24 hours</p>
+                    <p className="text-sm text-gray-600">stackflow.team@gmail.com</p>
+                    <p className="text-xs text-blue-500 mt-1">Response within 24 hours</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <Phone className="w-5 h-5 text-gray-900 mt-1" />
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-green-50/50 hover:bg-green-50/70 transition-colors">
+                  <Phone className="w-5 h-5 text-green-600 mt-1" />
                   <div>
                     <h3 className="font-medium text-gray-900">Phone</h3>
-                    <p className="text-sm text-gray-600">+1 (555) 123-4567</p>
-                    <p className="text-xs text-gray-500 mt-1">Mon-Fri, 9am-5pm PST</p>
+                    <p className="text-sm text-gray-600">+94 77 123 4567</p>
+                    <p className="text-xs text-green-500 mt-1">Mon-Fri, 9am-5pm PST</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-gray-900 mt-1" />
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-purple-50/50 hover:bg-purple-50/70 transition-colors">
+                  <MapPin className="w-5 h-5 text-purple-600 mt-1" />
                   <div>
                     <h3 className="font-medium text-gray-900">Office</h3>
-                    <p className="text-sm text-gray-600">San Francisco, CA</p>
-                    <p className="text-xs text-gray-500 mt-1">United States</p>
+                    <p className="text-sm text-gray-600">Wakanda Road, Homagama.</p>
+                    <p className="text-xs text-purple-500 mt-1">Sri Lanka</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Help</h2>
+            <div className="bg-white/70 backdrop-blur-sm border border-gray-200/50 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Home className="w-5 h-5 text-indigo-600" />
+                Quick Help
+              </h2>
               <div className="space-y-3">
                 <Link
                   href="/documentation"
-                  className="block p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="block p-4 bg-gradient-to-r from-indigo-50/50 to-blue-50/50 hover:from-indigo-100/70 hover:to-blue-100/70 rounded-lg transition-all duration-300 border border-indigo-200/30 hover:border-indigo-300/50 hover:shadow-md group"
                 >
-                  <h3 className="font-medium text-gray-900 text-sm">Documentation</h3>
-                  <p className="text-xs text-gray-600 mt-1">Browse our complete guides</p>
+                  <h3 className="font-medium text-gray-900 text-sm group-hover:text-indigo-700 transition-colors">Documentation</h3>
+                  <p className="text-xs text-gray-600 mt-1 group-hover:text-indigo-600 transition-colors">Browse our complete guides</p>
                 </Link>
                 <Link
                   href="/faq"
-                  className="block p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="block p-4 bg-gradient-to-r from-emerald-50/50 to-teal-50/50 hover:from-emerald-100/70 hover:to-teal-100/70 rounded-lg transition-all duration-300 border border-emerald-200/30 hover:border-emerald-300/50 hover:shadow-md group"
                 >
-                  <h3 className="font-medium text-gray-900 text-sm">FAQ</h3>
-                  <p className="text-xs text-gray-600 mt-1">Frequently asked questions</p>
+                  <h3 className="font-medium text-gray-900 text-sm group-hover:text-emerald-700 transition-colors">FAQ</h3>
+                  <p className="text-xs text-gray-600 mt-1 group-hover:text-emerald-600 transition-colors">Frequently asked questions</p>
                 </Link>
               </div>
             </div>
@@ -118,24 +124,24 @@ export default function SupportPage() {
 
           {/* Contact Form */}
           <div className="lg:col-span-2">
-            <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm">
+            <div className="bg-white/70 backdrop-blur-sm border border-gray-200/50 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300">
               {submitted ? (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <MessageSquare className="w-8 h-8 text-green-600" />
+                  <div className="w-20 h-20 bg-gradient-to-r from-green-400/80 to-emerald-500/80 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                    <MessageSquare className="w-10 h-10 text-white" />
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Message Sent!</h2>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent mb-2">Message Sent!</h2>
                   <p className="text-gray-600 mb-6">We've received your message and will get back to you shortly.</p>
                   <button
                     onClick={() => setSubmitted(false)}
-                    className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+                    className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 font-medium"
                   >
                     Send Another Message
                   </button>
                 </div>
               ) : (
                 <>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Send us a message</h2>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">Send us a message</h2>
                   <p className="text-gray-600 mb-6">Fill out the form below and we'll respond as soon as possible.</p>
 
                   <form onSubmit={handleSubmit} className="space-y-6">
@@ -151,7 +157,7 @@ export default function SupportPage() {
                           value={formData.name}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-900 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                          className="w-full px-4 py-3 bg-white/80 border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:bg-white/90 transition-all duration-300 placeholder-gray-400"
                           placeholder="John Doe"
                         />
                       </div>
@@ -167,7 +173,7 @@ export default function SupportPage() {
                           value={formData.email}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-3 border border-gray-900 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                          className="w-full px-4 py-3 bg-white/80 border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:bg-white/90 transition-all duration-300 placeholder-gray-400"
                           placeholder="john@example.com"
                         />
                       </div>
@@ -184,7 +190,7 @@ export default function SupportPage() {
                         value={formData.subject}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-3 border border-gray-900 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 bg-white/80 border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 focus:bg-white/90 transition-all duration-300 placeholder-gray-400"
                         placeholder="How can we help you?"
                       />
                     </div>
@@ -200,7 +206,7 @@ export default function SupportPage() {
                         onChange={handleChange}
                         required
                         rows={6}
-                        className="w-full px-4 py-3 border border-gray-900 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all resize-none"
+                        className="w-full px-4 py-3 bg-white/80 border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 focus:bg-white/90 transition-all duration-300 resize-none placeholder-gray-400"
                         placeholder="Please describe your question or issue in detail..."
                       />
                     </div>
@@ -209,7 +215,7 @@ export default function SupportPage() {
                       <button
                         type="submit"
                         disabled={loading}
-                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-600 hover:from-green-700 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
                       >
                         {loading ? (
                           <LoadingDots />

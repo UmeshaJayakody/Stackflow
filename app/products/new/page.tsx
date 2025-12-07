@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/app/context/AuthContext';
-import { useToast } from '../context/ToastContext';
+import { useToast } from '@/app/context/ToastContext';
 
 interface Warehouse {
   warehouseId: number;

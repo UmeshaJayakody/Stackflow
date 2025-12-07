@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../context/AuthContext";
-import LoadingDots from "../components/LoadingDots";
+import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
+import LoadingDots from "../../components/LoadingDots";
+import DeleteUserModal from "./components/DeleteUserModal";
+import ResetPasswordModal from "./components/ResetPasswordModal";
 
 interface User {
   userId: number;
@@ -16,11 +19,15 @@ interface User {
 export default function UsersPage() {
   const router = useRouter();
   const { user, isAdmin } = useAuth();
+  const toast = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showAdminUserModal, setShowAdminUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
 
   const fetchUsers = async () => {
     if (!isAdmin) return;
@@ -30,6 +37,63 @@ export default function UsersPage() {
       setUsers(data);
     } catch (error) {
       console.error('Error fetching users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!userToDelete) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/users/${userToDelete.userId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        toast.success('User deleted successfully');
+        setShowDeleteModal(false);
+        setUserToDelete(null);
+        fetchUsers();
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to delete user');
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetPassword = async (newPassword: string) => {
+    if (!selectedUser) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch('/api/users/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: selectedUser.userId,
+          newPassword
+        })
+      });
+
+      if (response.ok) {
+        toast.success('Password reset successfully');
+        setShowResetPasswordModal(false);
+        setShowAdminUserModal(false);
+        setSelectedUser(null);
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to reset password');
+      }
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      toast.error('Failed to reset password');
     } finally {
       setLoading(false);
     }
@@ -65,86 +129,99 @@ export default function UsersPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <header className="bg-white/40 backdrop-blur-md shadow-lg border-b border-gray-200/50 pt-16">
         <div className="container mx-auto px-6 md:px-8 lg:px-12 py-6">
-          <div className="flex justify-between items-center">
-            <div>
+          <div className="flex justify-center items-center">
+            <div className="text-center">
               <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Users Management</h1>
               <p className="text-gray-600 mt-1">Manage system users and permissions</p>
             </div>
-            <button
-              onClick={() => setShowAddUserModal(true)}
-              className="px-6 py-2.5 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg hover:from-gray-800 hover:to-gray-700 font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Add User
-            </button>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-6 md:px-8 lg:px-12 py-8">
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6 transform hover:scale-105 transition-all duration-300">
-            <div className="flex items-center justify-between">
+        <div className="bg-gradient-to-br from-purple-50/60 to-violet-50/40 backdrop-blur-md rounded-2xl shadow-2xl hover:shadow-3xl border border-purple-200/50 p-6 mb-8 transition-shadow duration-300">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+            <h3 className="text-lg font-semibold text-purple-900">User Dashboard</h3>
+            <button
+              onClick={() => setShowAddUserModal(true)}
+              className="px-6 py-2.5 bg-purple-600/80 backdrop-blur-sm text-white rounded-lg hover:bg-purple-700/90 font-medium shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center gap-2 border border-purple-500/30"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+              Add User
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="group relative bg-gradient-to-br from-purple-50/80 to-violet-50/60 backdrop-blur-lg rounded-2xl shadow-2xl hover:shadow-3xl border border-purple-200/50 p-6 transform hover:scale-105 transition-all duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-violet-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-white/40 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="relative flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-gray-600 uppercase tracking-wide">Total Users</h3>
+                <h3 className="text-sm font-bold text-purple-700 uppercase tracking-wide">Total Users</h3>
                 <p className="text-4xl font-bold text-gray-900 mt-3">{users.length}</p>
               </div>
-              <div className="bg-gradient-to-br from-gray-900 to-gray-700 p-4 rounded-xl">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-3 rounded-xl bg-purple-600/80 backdrop-blur-sm shadow-lg shadow-purple-500/20 text-white transform group-hover:rotate-12 transition-transform duration-300 border border-purple-500/30">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               </div>
             </div>
           </div>
-          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6 transform hover:scale-105 transition-all duration-300">
-            <div className="flex items-center justify-between">
+          <div className="group relative bg-gradient-to-br from-violet-50/80 to-purple-50/60 backdrop-blur-lg rounded-2xl shadow-2xl hover:shadow-3xl border border-violet-200/50 p-6 transform hover:scale-105 transition-all duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-500 to-purple-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-white/40 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="relative flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-gray-600 uppercase tracking-wide">Admins</h3>
+                <h3 className="text-sm font-bold text-violet-700 uppercase tracking-wide">Admins</h3>
                 <p className="text-4xl font-bold text-gray-900 mt-3">
                   {users.filter(u => u.role === 'admin').length}
                 </p>
               </div>
-              <div className="bg-gradient-to-br from-gray-800 to-gray-600 p-4 rounded-xl">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-3 rounded-xl bg-violet-600/80 backdrop-blur-sm shadow-lg shadow-violet-500/20 text-white transform group-hover:rotate-12 transition-transform duration-300 border border-violet-500/30">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
             </div>
           </div>
-          <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-gray-200/50 p-6 transform hover:scale-105 transition-all duration-300">
-            <div className="flex items-center justify-between">
+          <div className="group relative bg-gradient-to-br from-purple-50/80 to-violet-50/60 backdrop-blur-lg rounded-2xl shadow-2xl hover:shadow-3xl border border-purple-200/50 p-6 transform hover:scale-105 transition-all duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-violet-500 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-white/40 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="relative flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-gray-600 uppercase tracking-wide">Staff</h3>
+                <h3 className="text-sm font-bold text-purple-700 uppercase tracking-wide">Staff</h3>
                 <p className="text-4xl font-bold text-gray-900 mt-3">
                   {users.filter(u => u.role === 'staff').length}
                 </p>
               </div>
-              <div className="bg-gradient-to-br from-black to-gray-800 p-4 rounded-xl">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-3 rounded-xl bg-purple-600/80 backdrop-blur-sm shadow-lg shadow-purple-500/20 text-white transform group-hover:rotate-12 transition-transform duration-300 border border-purple-500/30">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
             </div>
           </div>
         </div>
+        </div>
 
         {/* Users Table */}
-        <div className="bg-white/60 backdrop-blur-md border border-gray-200/50 rounded-2xl shadow-2xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200/50 bg-gradient-to-r from-gray-900 to-gray-800">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+        <div className="bg-white/60 backdrop-blur-md border border-gray-200/50 rounded-2xl shadow-2xl hover:shadow-3xl overflow-hidden transition-shadow duration-300">
+          <div className="px-6 py-4 border-b border-gray-200/50 bg-purple-600/90">
+            <h2 className="text-xl font-bold text-white flex items-center gap-3">
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-md bg-purple-600/80 backdrop-blur-sm shadow-3xl shadow-purple-600/50 ring-4 ring-purple-100/30 border border-purple-500/30">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
-              All Users
+              </span>
+              <span>All Users ({users.length})</span>
             </h2>
           </div>
           
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-900">
+              <thead className="bg-purple-600/90">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                     Full Name
@@ -171,24 +248,24 @@ export default function UsersPage() {
                     </td>
                   </tr>
                 ) : (
-                  users.map((user) => (
-                    <tr key={user.userId} className="hover:bg-gray-100/80 transition-all duration-200">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-bold">
+                  users.map((user, index) => (
+                    <tr key={user.userId} className={`${index % 2 === 0 ? 'bg-purple-50/30' : 'bg-violet-50/30'} hover:bg-purple-100/50 transition-all duration-200`}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
                         {user.fullName}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-semibold">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-purple-700">
                         {user.email}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                           user.role === 'admin' 
-                            ? 'bg-gray-900 text-white' 
-                            : 'bg-gray-200 text-gray-900'
+                            ? 'bg-violet-600 text-white' 
+                            : 'bg-purple-200 text-violet-900'
                         }`}>
                           {user.role}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-semibold">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-violet-700">
                         {new Date(user.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -197,7 +274,7 @@ export default function UsersPage() {
                             setSelectedUser(user);
                             setShowAdminUserModal(true);
                           }}
-                          className="px-4 py-2 bg-gradient-to-r from-gray-700 to-gray-600 text-white rounded-xl hover:from-gray-600 hover:to-gray-500 font-bold shadow-lg transition-all duration-300"
+                          className="px-4 py-2 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-xl hover:from-purple-500 hover:to-violet-500 font-bold shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm border border-purple-500/30"
                         >
                           Manage
                         </button>
@@ -215,14 +292,14 @@ export default function UsersPage() {
       {showAddUserModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl max-w-md w-full mx-4 border-2 border-gray-200/50">
-            <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 p-6 rounded-t-3xl">
+            <div className="bg-purple-600 p-6 rounded-t-3xl border-b-2 border-purple-500">
               <h2 className="text-2xl font-bold text-white flex items-center gap-3">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                 </svg>
                 Add New User
               </h2>
-              <p className="text-gray-300 mt-1">Create a new user account</p>
+              <p className="text-purple-200 mt-1">Create a new user account</p>
             </div>
             <form onSubmit={async (e) => {
               e.preventDefault();
@@ -317,13 +394,13 @@ export default function UsersPage() {
                 <button
                   type="button"
                   onClick={() => setShowAddUserModal(false)}
-                  className="flex-1 px-4 py-3 text-gray-700 bg-gray-200 rounded-xl hover:bg-gray-300 transition-all duration-300 font-semibold"
+                  className="flex-1 px-4 py-3 text-purple-800 bg-purple-100/80 backdrop-blur-sm rounded-xl hover:bg-purple-200/90 transition-all duration-300 font-semibold border border-purple-300/50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl hover:from-gray-800 hover:to-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl font-semibold"
+                  className="flex-1 px-4 py-3 bg-purple-600/80 backdrop-blur-sm text-white rounded-xl hover:bg-purple-700/90 transition-all duration-300 shadow-lg shadow-purple-600/20 hover:shadow-xl font-semibold border border-purple-500/30"
                 >
                   Add User
                 </button>
@@ -337,7 +414,7 @@ export default function UsersPage() {
       {showAdminUserModal && selectedUser && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60]">
           <div className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl max-w-md w-full mx-4 border-2 border-gray-200/50">
-            <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 p-6 rounded-t-3xl">
+            <div className="bg-purple-600 p-6 rounded-t-3xl border-b-2 border-purple-500">
               <h2 className="text-2xl font-bold text-white flex items-center gap-3">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -345,7 +422,7 @@ export default function UsersPage() {
                 </svg>
                 Manage User
               </h2>
-              <p className="text-gray-300 mt-1">Update user settings and permissions</p>
+              <p className="text-purple-200 mt-1">Update user settings and permissions</p>
             </div>
             
             <div className="p-6">
@@ -369,30 +446,10 @@ export default function UsersPage() {
               <div className="space-y-3">
                 <button
                   onClick={() => {
-                    const newPassword = prompt('Enter new password for this user (minimum 6 characters):');
-                    if (newPassword && newPassword.length >= 6) {
-                      fetch('/api/users/reset-password', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          userId: selectedUser.userId,
-                          newPassword
-                        })
-                      }).then(async (response) => {
-                        if (response.ok) {
-                          toast.success('Password reset successfully');
-                          setShowAdminUserModal(false);
-                          setSelectedUser(null);
-                        } else {
-                          const error = await response.json();
-                          toast.error(error.error || 'Failed to reset password');
-                        }
-                      }).catch(() => toast.error('Failed to reset password'));
-                    } else if (newPassword !== null) {
-                      toast.success('Password must be at least 6 characters');
-                    }
+                    setShowResetPasswordModal(true);
+                    setShowAdminUserModal(false);
                   }}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-gray-700 to-gray-800 text-white rounded-xl hover:from-gray-800 hover:to-gray-900 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 font-semibold"
+                  className="w-full px-4 py-3 bg-purple-600/80 backdrop-blur-sm text-white rounded-xl hover:bg-purple-700/90 transition-all duration-300 shadow-lg shadow-purple-600/20 hover:shadow-xl flex items-center justify-center gap-2 font-semibold border border-purple-500/30"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
@@ -402,23 +459,11 @@ export default function UsersPage() {
 
                 <button
                   onClick={() => {
-                    if (confirm(`Are you sure you want to delete ${selectedUser.fullName}? This action cannot be undone.`)) {
-                      fetch(`/api/users/${selectedUser.userId}`, {
-                        method: 'DELETE'
-                      }).then(async (response) => {
-                        if (response.ok) {
-                          toast.success('User deleted successfully');
-                          setShowAdminUserModal(false);
-                          setSelectedUser(null);
-                          fetchUsers();
-                        } else {
-                          const error = await response.json();
-                          toast.error(error.error || 'Failed to delete user');
-                        }
-                      }).catch(() => toast.error('Failed to delete user'));
-                    }
+                    setUserToDelete(selectedUser);
+                    setShowDeleteModal(true);
+                    setShowAdminUserModal(false);
                   }}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl hover:from-gray-900 hover:to-black transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 font-semibold"
+                  className="w-full px-4 py-3 bg-red-600/80 backdrop-blur-sm text-white rounded-xl hover:bg-red-700/90 transition-all duration-300 shadow-lg shadow-red-600/20 hover:shadow-xl flex items-center justify-center gap-2 font-semibold border border-red-500/30"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -431,7 +476,7 @@ export default function UsersPage() {
                     setShowAdminUserModal(false);
                     setSelectedUser(null);
                   }}
-                  className="w-full px-4 py-3 text-gray-700 bg-gray-200 rounded-xl hover:bg-gray-300 transition-all duration-300 font-semibold"
+                  className="w-full px-4 py-3 text-purple-800 bg-purple-100/80 backdrop-blur-sm rounded-xl hover:bg-purple-200/90 transition-all duration-300 font-semibold border border-purple-300/50"
                 >
                   Close
                 </button>
@@ -440,7 +485,28 @@ export default function UsersPage() {
           </div>
         </div>
       )}
-      
+
+      <DeleteUserModal
+        isOpen={showDeleteModal}
+        user={userToDelete}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setUserToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        isLoading={loading}
+      />
+
+      <ResetPasswordModal
+        isOpen={showResetPasswordModal}
+        user={selectedUser}
+        onClose={() => {
+          setShowResetPasswordModal(false);
+          setSelectedUser(null);
+        }}
+        onConfirm={resetPassword}
+        isLoading={loading}
+      />
     </div>
   );
 }
