@@ -110,6 +110,21 @@ export default function ProductsPage() {
     return product.quantity <= threshold;
   };
 
+  // Handle productId from URL query parameter
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const productId = searchParams.get('productId');
+    
+    if (productId && products.length > 0) {
+      const product = products.find(p => p.productId === parseInt(productId));
+      if (product) {
+        openProductDetails(product);
+        // Clean up URL
+        window.history.replaceState({}, '', '/products');
+      }
+    }
+  }, [products]);
+
   useEffect(() => {
     fetchWarehouses();
     fetchSuppliers();

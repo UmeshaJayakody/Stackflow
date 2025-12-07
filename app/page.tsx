@@ -149,7 +149,7 @@ export default function Home() {
               {stats?.lowStockProducts && stats.lowStockProducts.length > 0 ? (
                 <div className="space-y-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
                   {stats.lowStockProducts.map((product: any) => (
-                    <Link key={product.productId} href={`/products/${product.productId}`} className="group relative overflow-hidden block cursor-pointer">
+                    <Link key={product.productId} href={`/products?productId=${product.productId}`} className="group relative overflow-hidden block cursor-pointer">
                       <div className="absolute inset-0 bg-gradient-to-r from-red-400/0 via-red-400/5 to-red-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       <div className="relative flex items-center justify-between p-4 bg-gradient-to-r from-red-50/80 to-orange-50/60 hover:from-red-100/90 hover:to-orange-100/70 backdrop-blur-sm rounded-xl border border-red-200/50 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
                         <div className="flex items-center gap-3 flex-1">
