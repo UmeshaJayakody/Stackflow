@@ -18,11 +18,11 @@ export async function POST(request: NextRequest) {
       where: { email },
     });
 
-    // Don't reveal if user exists or not for security
+    // If user doesn't exist, inform them to contact administrator
     if (!user) {
       return NextResponse.json(
-        { message: 'If an account with that email exists, a password reset link has been sent.' },
-        { status: 200 }
+        { error: 'Please contact your administrator to get login credentials. Currently you are not in the system.' },
+        { status: 404 }
       );
     }
 
