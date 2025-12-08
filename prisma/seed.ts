@@ -295,7 +295,7 @@ async function main() {
 
   console.log('✓ Created products');
 
-  console.log('✅ Database seeding completed successfully!');
+  console.log('Database seeding completed successfully!');
   console.log('');
   console.log('Login credentials:');
   console.log('  Email: admin@example.com');
