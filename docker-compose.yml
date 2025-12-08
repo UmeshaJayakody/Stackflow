@@ -1,23 +1,14 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: inventory_postgres
+  postgrest:
+    image: postgrest/postgrest:latest
+    container_name: inventory_postgrest
     restart: always
+    network_mode: "host"
     environment:
-      POSTGRES_USER: inventory_user
-      POSTGRES_PASSWORD: inventory_pass
-      POSTGRES_DB: inventory_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U inventory_user -d inventory_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  postgres_data:
+      PGRST_DB_URI: "postgres://inventory_user:1234@localhost:5433/inventory_db"
+      PGRST_DB_SCHEMA: "public"
+      PGRST_DB_ANON_ROLE: "web_anon"
+      PGRST_JWT_SECRET: "super_secret_jwt_token_min_32_characters_long_for_postgrest"
+      PGRST_SERVER_PORT: "3001"

@@ -17,7 +17,7 @@ async function main() {
   });
 
   console.log('✓ Created admin user');
-  console.log('✅ Database seeding completed successfully!');
+  console.log('Database seeding completed successfully!');
   console.log('');
   console.log('Login credentials:');
   console.log('  Email: admin@example.com');
@@ -26,7 +26,7 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error('❌ Error seeding database:', e);
+    console.error('Error seeding database:', e);
     process.exit(1);
   })
   .finally(async () => {
