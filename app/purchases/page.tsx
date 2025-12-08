@@ -430,7 +430,7 @@ export default function PurchasesPage() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full border-2 border-gray-300/50">
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-2xl w-full border-2 border-gray-300/50">
             <div className="bg-green-600 px-6 py-4 rounded-t-3xl border-b-2 border-green-500">
               <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                 <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -446,62 +446,60 @@ export default function PurchasesPage() {
                   <label htmlFor="supplierId" className="block text-sm font-bold text-gray-700 mb-2">
                     Supplier *
                   </label>
-                  <div className="flex gap-2">
-                    <select
-                      id="supplierId"
-                      name="supplierId"
-                      value={formData.supplierId}
-                      onChange={handleChange}
-                      required
-                      className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
-                    >
-                      <option value="">Select Supplier</option>
-                      {suppliers.map((supplier) => (
-                        <option key={supplier.supplierId} value={supplier.supplierId}>
-                          {supplier.supplierName}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => { setShowModal(false); setShowAddSupplierModal(true); }}
-                      className="px-4 py-2 bg-green-600/80 backdrop-blur-sm text-white rounded-xl hover:bg-green-700/90 font-bold whitespace-nowrap shadow-lg shadow-green-600/20 transition-all duration-300 border border-green-500/30"
-                      title="Add New Supplier"
-                    >
-                      + Add
-                    </button>
-                  </div>
+                  <select
+                    id="supplierId"
+                    name="supplierId"
+                    value={formData.supplierId}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold mb-2"
+                  >
+                    <option value="">Select Supplier</option>
+                    {suppliers.map((supplier) => (
+                      <option key={supplier.supplierId} value={supplier.supplierId}>
+                        {supplier.supplierName}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => { setShowModal(false); setShowAddSupplierModal(true); }}
+                    className="w-full px-4 py-2 bg-green-600/80 backdrop-blur-sm text-white rounded-xl hover:bg-green-700/90 font-bold shadow-lg shadow-green-600/20 transition-all duration-300 border border-green-500/30"
+                    title="Add New Supplier"
+                  >
+                    + Add New Supplier
+                  </button>
                 </div>
 
                 <div>
                   <label htmlFor="productId" className="block text-sm font-bold text-gray-700 mb-2">
                     Product *
                   </label>
-                  <div className="flex gap-2">
-                    <select
-                      id="productId"
-                      name="productId"
-                      value={formData.productId}
-                      onChange={handleChange}
-                      required
-                      className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold"
-                    >
-                      <option value="">Select Product</option>
-                      {products.map((product) => (
-                        <option key={product.productId} value={product.productId}>
-                          {product.productName} ({product.sku})
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => { setShowModal(false); setShowAddProductModal(true); }}
-                      className="px-4 py-2 bg-green-600/80 backdrop-blur-sm text-white rounded-xl hover:bg-green-700/90 font-bold whitespace-nowrap shadow-lg shadow-green-600/20 transition-all duration-300 border border-green-500/30"
-                      title="Add New Product"
-                    >
-                      + Add
-                    </button>
-                  </div>
+                  <select
+                    id="productId"
+                    name="productId"
+                    value={formData.productId}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 font-semibold mb-2"
+                  >
+                    <option value="">Select Product</option>
+                    {products.map((product) => (
+                      <option key={product.productId} value={product.productId}>
+                        {product.productName.length > 50 
+                          ? `${product.productName.substring(0, 50)}...` 
+                          : product.productName} ({product.sku})
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => { setShowModal(false); setShowAddProductModal(true); }}
+                    className="w-full px-4 py-2 bg-green-600/80 backdrop-blur-sm text-white rounded-xl hover:bg-green-700/90 font-bold shadow-lg shadow-green-600/20 transition-all duration-300 border border-green-500/30"
+                    title="Add New Product"
+                  >
+                    + Add New Product
+                  </button>
                 </div>
 
                 <div>
