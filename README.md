@@ -115,7 +115,7 @@ Before installing the application, ensure you have the following installed:
 - **Node.js**: Version 18.x or higher
 - **npm**: Version 9.x or higher (comes with Node.js)
 - **Docker**: Version 20.x or higher
-- **Docker Compose**: Version 2.x or higher
+- **PostgreSQL**: Version 14+ (if not using Docker)
 
 ## Installation
 
@@ -132,80 +132,298 @@ cd stackflow
 npm install
 ```
 
-## Database Setup with Docker
+## Database Setup
 
-The application uses PostgreSQL running in a Docker container for simplified setup and portability.
+You can set up PostgreSQL either using Docker (recommended) or as a native installation on your system.
 
-### 1. Start PostgreSQL Container
+### Option A: Docker Setup (Recommended)
+
+#### For Ubuntu/Linux
+
+**1. Install Docker and Docker Compose**
 
 ```bash
-docker-compose up -d
+# Update package index
+sudo apt update
+
+# Install prerequisites
+sudo apt install -y ca-certificates curl gnupg lsb-release
+
+# Add Docker's official GPG key
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+# Set up the repository
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Install Docker Engine
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+# Add your user to the docker group (to run without sudo)
+sudo usermod -aG docker $USER
+
+# Apply group changes (or log out and back in)
+newgrp docker
 ```
 
-This command will:
-- Pull the PostgreSQL 16 Alpine image
-- Create a container named `inventory_postgres`
-- Expose PostgreSQL on port 5432
-- Create a persistent volume for data storage
-
-### 2. Verify Container is Running
+**2. Start PostgreSQL Container**
 
 ```bash
+# Remove any existing container with the same name
+sudo docker rm -f mypostgresql 2>/dev/null || true
+
+# Start PostgreSQL container
+sudo docker run --name mypostgresql \
+  -e POSTGRES_USER=inventory_user \
+  -e POSTGRES_PASSWORD=1234 \
+  -e POSTGRES_DB=inventory_db \
+  -p 5433:5432 \
+  -d postgres
+
+# Verify container is running
+sudo docker ps
+```
+
+**3. Create PostgREST Role (for REST API access)**
+
+```bash
+sudo docker exec -i mypostgresql psql -U inventory_user -d inventory_db <<'EOF'
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'web_anon') THEN
+        CREATE ROLE web_anon NOLOGIN;
+    END IF;
+END
+$$;
+
+GRANT USAGE ON SCHEMA public TO web_anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO web_anon;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO web_anon;
+EOF
+```
+
+**4. Start PostgREST (Optional - for REST API)**
+
+```bash
+# Start PostgREST using docker-compose
+sudo docker compose up -d
+```
+
+#### For Windows
+
+**1. Install Docker Desktop**
+
+- Download Docker Desktop from: https://www.docker.com/products/docker-desktop/
+- Run the installer and follow the setup wizard
+- Enable WSL 2 backend when prompted
+- Restart your computer if required
+- Start Docker Desktop from the Start menu
+
+**2. Open PowerShell or Command Prompt and verify Docker**
+
+```powershell
+docker --version
+docker compose version
+```
+
+**3. Start PostgreSQL Container**
+
+```powershell
+# Remove any existing container with the same name
+docker rm -f mypostgresql 2>$null
+
+# Start PostgreSQL container
+docker run --name mypostgresql `
+  -e POSTGRES_USER=inventory_user `
+  -e POSTGRES_PASSWORD=1234 `
+  -e POSTGRES_DB=inventory_db `
+  -p 5433:5432 `
+  -d postgres
+
+# Verify container is running
 docker ps
 ```
 
-### 3. Run Database Migrations
+**4. Create PostgREST Role (for REST API access)**
 
-Initialize the database schema using Prisma:
+```powershell
+docker exec -i mypostgresql psql -U inventory_user -d inventory_db
+```
+
+Then in the PostgreSQL prompt, run:
+
+```sql
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'web_anon') THEN
+        CREATE ROLE web_anon NOLOGIN;
+    END IF;
+END
+$$;
+
+GRANT USAGE ON SCHEMA public TO web_anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO web_anon;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO web_anon;
+\q
+```
+
+**5. Start PostgREST (Optional - for REST API)**
+
+```powershell
+docker compose up -d
+```
+
+### Option B: Native PostgreSQL Installation
+
+#### For Ubuntu/Linux
+
+```bash
+# Install PostgreSQL
+sudo apt update
+sudo apt install -y postgresql postgresql-contrib
+
+# Start PostgreSQL service
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+
+# Create database and user
+sudo -u postgres psql <<EOF
+CREATE USER inventory_user WITH PASSWORD '1234';
+CREATE DATABASE inventory_db OWNER inventory_user;
+GRANT ALL PRIVILEGES ON DATABASE inventory_db TO inventory_user;
+EOF
+```
+
+Update your `.env` file to use:
+```env
+DATABASE_URL="postgresql://inventory_user:1234@localhost:5432/inventory_db?schema=public"
+```
+
+#### For Windows
+
+1. Download PostgreSQL installer from: https://www.postgresql.org/download/windows/
+2. Run the installer and follow the setup wizard
+3. Set a password for the `postgres` user during installation
+4. Use pgAdmin (installed with PostgreSQL) or psql to create the database:
+
+```sql
+CREATE USER inventory_user WITH PASSWORD '1234';
+CREATE DATABASE inventory_db OWNER inventory_user;
+GRANT ALL PRIVILEGES ON DATABASE inventory_db TO inventory_user;
+```
+
+Update your `.env` file to use:
+```env
+DATABASE_URL="postgresql://inventory_user:1234@localhost:5432/inventory_db?schema=public"
+```
+
+### Initialize Database
+
+After setting up PostgreSQL (Docker or native), run these commands:
+
+**1. Generate Prisma Client**
+
+```bash
+npx prisma generate
+```
+
+**2. Run Database Migrations**
 
 ```bash
 npx prisma migrate deploy
 ```
 
-### 4. Seed the Database (Optional)
-
-Populate the database with initial data:
+**3. Seed the Database (Optional)**
 
 ```bash
 npx prisma db seed
 ```
 
-This creates default admin user (admin@example.com / admin123) and sample data.
+This creates a default admin user:
+- Email: `admin@example.com`
+- Password: `admin123`
 
 ### Database Management Commands
 
-- **Stop the database:**
-  ```bash
-  docker-compose stop
-  ```
+**Docker Commands:**
 
-- **Start the database:**
-  ```bash
-  docker-compose start
-  ```
+```bash
+# Start PostgreSQL
+sudo docker start mypostgresql
 
-- **Remove the database container:**
-  ```bash
-  docker-compose down
-  ```
+# Stop PostgreSQL
+sudo docker stop mypostgresql
 
-- **Access PostgreSQL CLI:**
-  ```bash
-  docker exec -it inventory_postgres psql -U inventory_user -d inventory_db
-  ```
+# View logs
+sudo docker logs mypostgresql
 
-- **Prisma Studio (Database GUI):**
-  ```bash
-  npx prisma studio
-  ```
+# Access PostgreSQL CLI
+sudo docker exec -it mypostgresql psql -U inventory_user -d inventory_db
+
+# Remove container (WARNING: deletes data)
+sudo docker rm -f mypostgresql
+```
+
+**Native PostgreSQL (Ubuntu):**
+
+```bash
+# Start/Stop service
+sudo systemctl start postgresql
+sudo systemctl stop postgresql
+
+# Access PostgreSQL CLI
+sudo -u postgres psql -d inventory_db
+```
+
+**Native PostgreSQL (Windows):**
+
+Use pgAdmin GUI or:
+```powershell
+psql -U inventory_user -d inventory_db
+```
+
+**Prisma Studio (Database GUI) - All Platforms:**
+
+```bash
+npx prisma studio
+```
 
 ## Environment Configuration
 
-Create a `.env` file in the project root:
+Create a `.env` file in the project root directory.
+
+### For Ubuntu/Linux
+
+```bash
+# Create .env file
+nano .env
+# or
+vim .env
+# or use any text editor
+```
+
+### For Windows
+
+```powershell
+# Create .env file using Notepad
+notepad .env
+# or use VS Code, any text editor
+```
+
+### Environment Variables
+
+Add the following to your `.env` file:
 
 ```env
 # Database Connection
-DATABASE_URL="postgresql://inventory_user:inventory_pass@localhost:5432/inventory_db"
+# For Docker setup (port 5433):
+DATABASE_URL="postgresql://inventory_user:1234@localhost:5433/inventory_db?schema=public"
+
+# For native PostgreSQL (port 5432):
+# DATABASE_URL="postgresql://inventory_user:1234@localhost:5432/inventory_db?schema=public"
 
 # Application Settings
 NODE_ENV="development"
@@ -222,11 +440,23 @@ EMAIL_FROM="Inventory System <your-email@gmail.com>"
 SESSION_SECRET="your-random-secret-key-change-this-in-production"
 ```
 
+**Important Notes:**
+- For Docker setup: Use port `5433` (as shown above)
+- For native PostgreSQL: Use port `5432`
+- Update email settings with your actual SMTP credentials
+- Change `SESSION_SECRET` to a secure random string in production
+
 ## Running the Application
 
 ### Development Mode
 
+**Ubuntu/Linux:**
 ```bash
+npm run dev
+```
+
+**Windows (PowerShell/CMD):**
+```powershell
 npm run dev
 ```
 
@@ -234,9 +464,105 @@ The application will be available at: `http://localhost:3000`
 
 ### Production Build
 
+**Ubuntu/Linux:**
 ```bash
 npm run build
 npm start
+```
+
+**Windows (PowerShell/CMD):**
+```powershell
+npm run build
+npm start
+```
+
+## PostgREST API Access
+
+If you've set up PostgREST (optional), you can access your database via REST API at `http://localhost:3001`
+
+### Testing PostgREST Endpoints
+
+**Ubuntu/Linux:**
+```bash
+# View all available tables/endpoints
+curl http://localhost:3001/
+
+# Query users table
+curl http://localhost:3001/users
+
+# Query products table
+curl http://localhost:3001/products
+
+# Query with filters
+curl "http://localhost:3001/products?category=eq.Electronics"
+
+# Insert a new record
+curl -X POST http://localhost:3001/products \
+  -H "Content-Type: application/json" \
+  -d '{"product_name":"New Product","sku":"PROD-001","unit_price":99.99}'
+```
+
+**Windows (PowerShell):**
+```powershell
+# View all available tables/endpoints
+Invoke-WebRequest -Uri http://localhost:3001/
+
+# Query users table
+Invoke-WebRequest -Uri http://localhost:3001/users
+
+# Query products table
+Invoke-WebRequest -Uri http://localhost:3001/products
+
+# Query with filters
+Invoke-WebRequest -Uri "http://localhost:3001/products?category=eq.Electronics"
+
+# Insert a new record
+$body = @{
+    product_name = "New Product"
+    sku = "PROD-001"
+    unit_price = 99.99
+} | ConvertTo-Json
+
+Invoke-WebRequest -Uri http://localhost:3001/products `
+  -Method POST `
+  -ContentType "application/json" `
+  -Body $body
+```
+
+**Using a Web Browser:**
+- Simply navigate to: `http://localhost:3001/users`
+- Or use tools like Postman, Insomnia, or Thunder Client (VS Code extension)
+
+### PostgREST Container Management
+
+**Ubuntu/Linux:**
+```bash
+# View PostgREST logs
+sudo docker logs inventory_postgrest
+
+# Restart PostgREST
+sudo docker restart inventory_postgrest
+
+# Stop PostgREST
+sudo docker stop inventory_postgrest
+
+# Start PostgREST
+sudo docker start inventory_postgrest
+```
+
+**Windows (PowerShell):**
+```powershell
+# View PostgREST logs
+docker logs inventory_postgrest
+
+# Restart PostgREST
+docker restart inventory_postgrest
+
+# Stop PostgREST
+docker stop inventory_postgrest
+
+# Start PostgREST
+docker start inventory_postgrest
 ```
 
 ## API Documentation
@@ -316,8 +642,25 @@ Create a new user (Admin only).
 }
 ```
 
+#### GET /api/users/[id]
+Retrieve a specific user by ID.
+
+#### PUT /api/users/[id]
+Update a user by ID (Admin only).
+
 #### DELETE /api/users/[id]
 Delete a user by ID.
+
+#### POST /api/users/reset-password
+Reset another user's password (Admin only).
+
+**Request:**
+```json
+{
+  "userId": 2,
+  "newPassword": "newPassword123"
+}
+```
 
 #### POST /api/users/change-password
 Change current user's password.
@@ -459,6 +802,9 @@ Create a new warehouse.
 }
 ```
 
+#### GET /api/warehouses/[id]
+Retrieve a specific warehouse by ID.
+
 #### PUT /api/warehouses/[id]
 Update a warehouse.
 
@@ -523,6 +869,16 @@ Retrieve dashboard statistics.
 - Low stock products
 - Recent sales
 - Top products
+
+### Documentation Endpoints
+
+#### GET /api/documentation
+Retrieve API documentation and system information.
+
+### Support Endpoints
+
+#### GET /api/support
+Retrieve support information and contact details.
 
 ### Report Endpoints
 
