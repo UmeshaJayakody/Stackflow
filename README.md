@@ -642,8 +642,25 @@ Create a new user (Admin only).
 }
 ```
 
+#### GET /api/users/[id]
+Retrieve a specific user by ID.
+
+#### PUT /api/users/[id]
+Update a user by ID (Admin only).
+
 #### DELETE /api/users/[id]
 Delete a user by ID.
+
+#### POST /api/users/reset-password
+Reset another user's password (Admin only).
+
+**Request:**
+```json
+{
+  "userId": 2,
+  "newPassword": "newPassword123"
+}
+```
 
 #### POST /api/users/change-password
 Change current user's password.
@@ -785,6 +802,9 @@ Create a new warehouse.
 }
 ```
 
+#### GET /api/warehouses/[id]
+Retrieve a specific warehouse by ID.
+
 #### PUT /api/warehouses/[id]
 Update a warehouse.
 
@@ -849,6 +869,16 @@ Retrieve dashboard statistics.
 - Low stock products
 - Recent sales
 - Top products
+
+### Documentation Endpoints
+
+#### GET /api/documentation
+Retrieve API documentation and system information.
+
+### Support Endpoints
+
+#### GET /api/support
+Retrieve support information and contact details.
 
 ### Report Endpoints
 
