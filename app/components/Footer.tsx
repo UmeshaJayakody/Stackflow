@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Package, Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Github } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Github } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Footer() {

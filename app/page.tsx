@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import FeaturedCrmDemoSection from './components/ui/featured-crm-demo-section';
 import ProductStockTrend from './components/ui/product-stock-trend';
@@ -8,15 +8,30 @@ import DailyProfitLossBar from './components/ui/daily-profit-loss-bar';
 import LoadingDots from './components/LoadingDots';
 import { useToast } from './context/ToastContext';
 
+interface WarehouseSummary {
+  warehouseId: number;
+  warehouseName: string;
+  _count: { products: number };
+}
+
+interface LowStockProduct {
+  productId: number;
+  productName: string;
+  sku: string;
+  quantity: number;
+  minimumQuantity: number;
+  maximumQuantity: number;
+}
+
 interface DashboardStats {
   totalProducts: number;
   totalInventoryValue: string;
   totalStockQuantity: number;
   lowStockCount: number;
-  lowStockProducts: any[];
-  productsByWarehouse: any[];
-  recentStockMovements: any[];
-  profitData: any[];
+  lowStockProducts: LowStockProduct[];
+  productsByWarehouse: WarehouseSummary[];
+  recentStockMovements: unknown[];
+  profitData: unknown[];
   totalProfit: string;
   totalRevenue: string;
 }
@@ -26,11 +41,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const toast = useToast();
 
-  useEffect(() => {
-    fetchDashboardStats();
-  }, []);
-
-  const fetchDashboardStats = async () => {
+  const fetchDashboardStats = useCallback(async () => {
     try {
       const response = await fetch('/api/dashboard');
       const result = await response.json();
@@ -45,7 +56,11 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchDashboardStats();
+  }, [fetchDashboardStats]);
 
   if (loading) {
     return (
@@ -95,7 +110,7 @@ export default function Home() {
             <div className="relative p-6">
               {stats?.productsByWarehouse && stats.productsByWarehouse.length > 0 ? (
                 <div className="space-y-3">
-                  {stats.productsByWarehouse.map((warehouse: any, idx: number) => (
+                  {stats.productsByWarehouse.map((warehouse, idx) => (
                     <Link key={warehouse.warehouseId} href="/products" className="group relative overflow-hidden block cursor-pointer">
                       <div className="absolute inset-0 bg-gradient-to-r from-blue-400/0 via-blue-400/5 to-blue-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       <div className="relative flex items-center justify-between p-4 bg-white/50 hover:bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/30 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
@@ -153,7 +168,7 @@ export default function Home() {
             <div className="relative p-6">
               {stats?.lowStockProducts && stats.lowStockProducts.length > 0 ? (
                 <div className="space-y-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
-                  {stats.lowStockProducts.map((product: any) => (
+                  {stats.lowStockProducts.map((product) => (
                     <Link key={product.productId} href={`/products?productId=${product.productId}`} className="group relative overflow-hidden block cursor-pointer">
                       <div className="absolute inset-0 bg-gradient-to-r from-red-400/0 via-red-400/5 to-red-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       <div className="relative flex items-center justify-between p-4 bg-gradient-to-r from-red-50/80 to-orange-50/60 hover:from-red-100/90 hover:to-orange-100/70 backdrop-blur-sm rounded-xl border border-red-200/50 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">

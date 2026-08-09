@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
@@ -29,7 +29,7 @@ export default function UsersPage() {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     if (!isAdmin) return;
     try {
       const response = await fetch('/api/users');
@@ -40,7 +40,7 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isAdmin]);
 
   const confirmDelete = async () => {
     if (!userToDelete) return;
@@ -109,7 +109,7 @@ export default function UsersPage() {
     if (user) {
       fetchUsers();
     }
-  }, [user, isAdmin, router]);
+  }, [user, isAdmin, router, fetchUsers]);
 
   if (!user || !isAdmin) {
     return null;

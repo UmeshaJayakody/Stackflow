@@ -11,7 +11,7 @@ export async function GET() {
       success: true,
       content,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error reading README:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to load documentation' },

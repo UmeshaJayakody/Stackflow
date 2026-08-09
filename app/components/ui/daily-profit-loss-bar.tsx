@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { TrendingUp, TrendingDown, DollarSign, Wallet } from 'lucide-react';
 import LoadingDots from '../LoadingDots';
 import { useToast } from '../../context/ToastContext';
@@ -24,11 +24,7 @@ export default function DailyProfitLossBar() {
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
   const toast = useToast();
 
-  useEffect(() => {
-    fetchProfitData();
-  }, [timeRange]);
-
-  const fetchProfitData = async () => {
+  const fetchProfitData = useCallback(async () => {
     setLoading(true);
     try {
       const days = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
@@ -45,7 +41,11 @@ export default function DailyProfitLossBar() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [timeRange, toast]);
+
+  useEffect(() => {
+    fetchProfitData();
+  }, [fetchProfitData]);
 
   const dailyData = data?.dailyData || [];
   const maxValue = Math.max(...dailyData.map(d => Math.max(d.revenue, Math.abs(d.profit))), 1); // At least 1 to avoid division by zero

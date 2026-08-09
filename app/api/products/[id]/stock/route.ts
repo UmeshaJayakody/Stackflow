@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getErrorMessage } from '@/lib/utils';
 
 // PATCH - Update stock quantity (add or remove stock)
 export async function PATCH(
@@ -80,10 +81,10 @@ export async function PATCH(
       data: updatedProduct,
       message: `Stock ${type === 'add' ? 'added' : 'removed'} successfully`,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error updating stock:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to update stock', message: error.message },
+      { success: false, error: 'Failed to update stock', message: getErrorMessage(error) },
       { status: 500 }
     );
   }

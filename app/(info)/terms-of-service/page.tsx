@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FileText, ArrowLeft } from 'lucide-react';
+import { FileText } from 'lucide-react';
 
 export default function TermsOfServicePage() {
   return (
@@ -31,10 +31,10 @@ export default function TermsOfServicePage() {
             <section className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Acceptance of Terms</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                By accessing and using StackFlow ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
+                By accessing and using StackFlow (&quot;the Service&quot;), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
               </p>
               <p className="text-gray-700 leading-relaxed">
-                These Terms of Service ("Terms") apply to all users of the StackFlow inventory management system.
+                These Terms of Service (&quot;Terms&quot;) apply to all users of the StackFlow inventory management system.
               </p>
             </section>
 
@@ -125,7 +125,7 @@ export default function TermsOfServicePage() {
             <section className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Limitation of Liability</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                StackFlow is provided "as is" without warranties of any kind. We shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the service.
+                StackFlow is provided &quot;as is&quot; without warranties of any kind. We shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the service.
               </p>
               <p className="text-gray-700 leading-relaxed">
                 Our total liability shall not exceed the amount paid by you for the service in the 12 months preceding the claim.

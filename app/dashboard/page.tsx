@@ -1,18 +1,41 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useToast } from '../context/ToastContext';
+import LoadingDots from '../components/LoadingDots';
+
+interface ProfitDataPoint {
+  date: string;
+  revenue: number;
+  profit: number;
+  sales: number;
+}
+
+interface WarehouseSummary {
+  warehouseId: number;
+  warehouseName: string;
+  _count: { products: number };
+}
+
+interface LowStockProduct {
+  productId: number;
+  productName: string;
+  sku: string;
+  quantity: number;
+  minimumQuantity: number;
+  maximumQuantity: number;
+}
 
 interface DashboardStats {
   totalProducts: number;
   totalInventoryValue: string;
   totalStockQuantity: number;
   lowStockCount: number;
-  lowStockProducts: any[];
-  productsByWarehouse: any[];
-  recentStockMovements: any[];
-  profitData: any[];
+  lowStockProducts: LowStockProduct[];
+  productsByWarehouse: WarehouseSummary[];
+  recentStockMovements: unknown[];
+  profitData: ProfitDataPoint[];
   totalProfit: string;
   totalRevenue: string;
 }
@@ -22,11 +45,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const toast = useToast();
 
-  useEffect(() => {
-    fetchDashboardStats();
-  }, []);
-
-  const fetchDashboardStats = async () => {
+  const fetchDashboardStats = useCallback(async () => {
     try {
       const response = await fetch('/api/dashboard');
       const result = await response.json();
@@ -41,7 +60,19 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchDashboardStats();
+  }, [fetchDashboardStats]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingDots />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -141,8 +172,8 @@ export default function DashboardPage() {
                   {/* Y-axis labels */}
                   <div className="absolute left-0 top-0 bottom-0 w-16 flex flex-col justify-between text-xs text-gray-600 pr-2 text-right pb-6">
                     {(() => {
-                      const maxProfit = Math.max(...stats.profitData.map((d: any) => d.profit), 0);
-                      const minProfit = Math.min(...stats.profitData.map((d: any) => d.profit), 0);
+                      const maxProfit = Math.max(...stats.profitData.map((d) => d.profit), 0);
+                      const minProfit = Math.min(...stats.profitData.map((d) => d.profit), 0);
                       const range = maxProfit - minProfit;
                       const step = range / 4;
                       return [maxProfit, maxProfit - step, maxProfit - 2 * step, maxProfit - 3 * step, minProfit].map((val, i) => (
@@ -156,12 +187,12 @@ export default function DashboardPage() {
                     <svg className="w-full h-full" preserveAspectRatio="none">
                       {(() => {
                         const data = stats.profitData;
-                        const maxProfit = Math.max(...data.map((d: any) => d.profit), 0);
-                        const minProfit = Math.min(...data.map((d: any) => d.profit), 0);
+                        const maxProfit = Math.max(...data.map((d) => d.profit), 0);
+                        const minProfit = Math.min(...data.map((d) => d.profit), 0);
                         const range = maxProfit - minProfit || 1;
-                        
+
                         // Calculate points for the line
-                        const points = data.map((item: any, index: number) => {
+                        const points = data.map((item, index) => {
                           const x = (index / (data.length - 1)) * 100;
                           const y = ((maxProfit - item.profit) / range) * 100;
                           return `${x},${y}`;
@@ -203,7 +234,7 @@ export default function DashboardPage() {
                             />
                             
                             {/* Data points */}
-                            {data.map((item: any, index: number) => {
+                            {data.map((item, index) => {
                               const x = (index / (data.length - 1)) * 100;
                               const y = ((maxProfit - item.profit) / range) * 100;
                               return (
@@ -251,19 +282,19 @@ export default function DashboardPage() {
                   <div className="text-center">
                     <p className="text-sm text-gray-600">Profitable Days</p>
                     <p className="text-2xl font-bold text-green-600">
-                      {stats.profitData.filter((d: any) => d.profit > 0).length}
+                      {stats.profitData.filter((d) => d.profit > 0).length}
                     </p>
                   </div>
                   <div className="text-center">
                     <p className="text-sm text-gray-600">Loss Days</p>
                     <p className="text-2xl font-bold text-red-600">
-                      {stats.profitData.filter((d: any) => d.profit < 0).length}
+                      {stats.profitData.filter((d) => d.profit < 0).length}
                     </p>
                   </div>
                   <div className="text-center">
                     <p className="text-sm text-gray-600">Total Sales</p>
                     <p className="text-2xl font-bold text-blue-600">
-                      {stats.profitData.reduce((sum: number, d: any) => sum + d.sales, 0)}
+                      {stats.profitData.reduce((sum, d) => sum + d.sales, 0)}
                     </p>
                   </div>
                 </div>
@@ -283,7 +314,7 @@ export default function DashboardPage() {
             <div className="p-6">
               {stats?.productsByWarehouse && stats.productsByWarehouse.length > 0 ? (
                 <div className="space-y-4">
-                  {stats.productsByWarehouse.map((warehouse: any) => (
+                  {stats.productsByWarehouse.map((warehouse) => (
                     <div key={warehouse.warehouseId} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <span className="font-medium text-gray-900">{warehouse.warehouseName}</span>
                       <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
@@ -307,7 +338,7 @@ export default function DashboardPage() {
             <div className="p-6">
               {stats?.lowStockProducts && stats.lowStockProducts.length > 0 ? (
                 <div className="space-y-3 max-h-64 overflow-y-auto">
-                  {stats.lowStockProducts.map((product: any) => (
+                  {stats.lowStockProducts.map((product) => (
                     <div key={product.productId} className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
                       <div>
                         <p className="font-medium text-gray-900">{product.productName}</p>

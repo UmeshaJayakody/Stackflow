@@ -44,7 +44,7 @@ export default function DeleteWarehouseModal({
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Are you sure?</h3>
             <p className="text-gray-600 mb-4">
-              You are about to delete <span className="font-semibold text-gray-900">"{warehouse.warehouseName}"</span>.
+              You are about to delete <span className="font-semibold text-gray-900">&quot;{warehouse.warehouseName}&quot;</span>.
             </p>
             {warehouse._count && warehouse._count.products > 0 && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">

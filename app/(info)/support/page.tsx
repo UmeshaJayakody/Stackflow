@@ -134,7 +134,7 @@ export default function SupportPage() {
                     <MessageSquare className="w-10 h-10 text-white" />
                   </div>
                   <h2 className="text-2xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent mb-2">Message Sent!</h2>
-                  <p className="text-gray-600 mb-6">We've received your message and will get back to you shortly.</p>
+                  <p className="text-gray-600 mb-6">We&apos;ve received your message and will get back to you shortly.</p>
                   <button
                     onClick={() => setSubmitted(false)}
                     className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 font-medium"
@@ -145,7 +145,7 @@ export default function SupportPage() {
               ) : (
                 <>
                   <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">Send us a message</h2>
-                  <p className="text-gray-600 mb-6">Fill out the form below and we'll respond as soon as possible.</p>
+                  <p className="text-gray-600 mb-6">Fill out the form below and we&apos;ll respond as soon as possible.</p>
 
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

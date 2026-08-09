@@ -27,19 +27,6 @@ interface Product {
   createdAt: string;
 }
 
-interface EditProductForm {
-  productId: number;
-  productName: string;
-  sku: string;
-  category: string;
-  unitPrice: string;
-  quantity: string;
-  minimumQuantity: string;
-  maximumQuantity: string;
-  warehouseId: string;
-  supplierId: string;
-}
-
 interface ProductsTableProps {
   products: Product[];
   loading: boolean;

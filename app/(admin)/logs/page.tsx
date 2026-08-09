@@ -296,12 +296,12 @@ export default function LogsPage() {
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-gray-200 text-gray-900">
+                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${getActionBadgeColor(log.action)}`}>
                           {log.action}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-gray-800 text-white">
+                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${getEntityTypeColor(log.entityType)}`}>
                           {log.entityType}
                         </span>
                       </td>

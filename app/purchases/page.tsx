@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import LoadingDots from '../components/LoadingDots';
@@ -9,6 +8,11 @@ import LoadingDots from '../components/LoadingDots';
 interface Supplier {
   supplierId: number;
   supplierName: string;
+}
+
+interface Warehouse {
+  warehouseId: number;
+  warehouseName: string;
 }
 
 interface Product {
@@ -36,7 +40,7 @@ export default function PurchasesPage() {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [warehouses, setWarehouses] = useState<any[]>([]);
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);

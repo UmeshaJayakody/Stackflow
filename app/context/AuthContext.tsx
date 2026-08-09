@@ -28,10 +28,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Load user from localStorage on mount
+    // Load user from localStorage on mount. localStorage only exists
+    // client-side, so this can't be a lazy useState initializer (which
+    // would also run during SSR).
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUser(JSON.parse(storedUser));
       } catch {
         localStorage.removeItem("user");

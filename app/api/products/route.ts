@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { logActivity } from '@/lib/activityLogger';
+import { getErrorMessage } from '@/lib/utils';
 
 // GET all products with optional search and filter
 export async function GET(request: NextRequest) {
@@ -11,7 +13,7 @@ export async function GET(request: NextRequest) {
     const warehouseId = searchParams.get('warehouseId');
     const supplierId = searchParams.get('supplierId');
 
-    const where: any = {};
+    const where: Prisma.ProductWhereInput = {};
 
     // Search by name or SKU
     if (search) {
@@ -58,10 +60,10 @@ export async function GET(request: NextRequest) {
       data: products,
       count: products.length,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching products:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch products', message: error.message },
+      { success: false, error: 'Failed to fetch products', message: getErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -143,10 +145,10 @@ export async function POST(request: NextRequest) {
       { success: true, data: product, message: 'Product created successfully' },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error creating product:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to create product', message: error.message },
+      { success: false, error: 'Failed to create product', message: getErrorMessage(error) },
       { status: 500 }
     );
   }

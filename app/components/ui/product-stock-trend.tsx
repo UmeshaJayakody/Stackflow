@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { TrendingUp, TrendingDown, ChevronDown } from 'lucide-react';
 import LoadingDots from '../LoadingDots';
 import { useToast } from '../../context/ToastContext';
@@ -27,17 +27,7 @@ export default function ProductStockTrend() {
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
   const toast = useToast();
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  useEffect(() => {
-    if (selectedProduct) {
-      fetchStockTrend(selectedProduct);
-    }
-  }, [selectedProduct, timeRange]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       const response = await fetch('/api/products');
       const result = await response.json();
@@ -48,9 +38,9 @@ export default function ProductStockTrend() {
     } catch (error) {
       console.error('Error fetching products:', error);
     }
-  };
+  }, []);
 
-  const fetchStockTrend = async (productId: number) => {
+  const fetchStockTrend = useCallback(async (productId: number) => {
     setLoading(true);
     try {
       const days = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
@@ -65,7 +55,17 @@ export default function ProductStockTrend() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [timeRange, toast]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  useEffect(() => {
+    if (selectedProduct) {
+      fetchStockTrend(selectedProduct);
+    }
+  }, [selectedProduct, timeRange, fetchStockTrend]);
 
   const selectedProductData = products.find(p => p.productId === selectedProduct);
   const maxStock = Math.max(...stockData.map(d => d.runningTotal), 0);

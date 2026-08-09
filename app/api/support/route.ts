@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/emailService';
+import { getErrorMessage } from '@/lib/utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -80,13 +81,13 @@ Reply to: ${email}
       success: true,
       message: 'Support request sent successfully',
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error sending support email:', error);
     return NextResponse.json(
       { 
         success: false, 
         error: 'Failed to send support request',
-        message: error.message 
+        message: getErrorMessage(error) 
       },
       { status: 500 }
     );

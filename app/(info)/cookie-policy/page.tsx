@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Cookie, ArrowLeft } from 'lucide-react';
+import { Cookie } from 'lucide-react';
 
 export default function CookiePolicyPage() {
   return (
@@ -134,7 +134,7 @@ export default function CookiePolicyPage() {
               <ul className="list-disc pl-6 text-gray-700 mb-4">
                 <li><strong>Essential cookies:</strong> Disabling these will prevent the service from functioning properly</li>
                 <li><strong>Functional cookies:</strong> You may need to reconfigure preferences on each visit</li>
-                <li><strong>Analytics cookies:</strong> We won't be able to improve the service based on usage data</li>
+                <li><strong>Analytics cookies:</strong> We won&apos;t be able to improve the service based on usage data</li>
                 <li><strong>Marketing cookies:</strong> You may see less relevant advertisements</li>
               </ul>
             </section>
@@ -154,7 +154,7 @@ export default function CookiePolicyPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Updates to This Policy</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                We may update this Cookie Policy from time to time to reflect changes in our practices or for legal reasons. We will notify you of any material changes and update the "Last updated" date.
+                We may update this Cookie Policy from time to time to reflect changes in our practices or for legal reasons. We will notify you of any material changes and update the &quot;Last updated&quot; date.
               </p>
             </section>
 
@@ -189,7 +189,7 @@ export default function CookiePolicyPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">10. Cookie List</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                Here's a detailed list of cookies we use:
+                Here&apos;s a detailed list of cookies we use:
               </p>
 
               <div className="overflow-x-auto">

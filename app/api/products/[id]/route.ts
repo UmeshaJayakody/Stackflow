@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { logActivity } from '@/lib/activityLogger';
+import { getErrorMessage } from '@/lib/utils';
 
 // GET single product by ID
 export async function GET(
@@ -34,10 +35,10 @@ export async function GET(
     }
 
     return NextResponse.json({ success: true, data: product });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching product:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch product', message: error.message },
+      { success: false, error: 'Failed to fetch product', message: getErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -118,10 +119,10 @@ export async function PUT(
       data: product,
       message: 'Product updated successfully',
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error updating product:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to update product', message: error.message },
+      { success: false, error: 'Failed to update product', message: getErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -176,10 +177,10 @@ export async function DELETE(
       success: true,
       message: 'Product deleted successfully',
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error deleting product:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to delete product', message: error.message },
+      { success: false, error: 'Failed to delete product', message: getErrorMessage(error) },
       { status: 500 }
     );
   }

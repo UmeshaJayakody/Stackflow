@@ -13,7 +13,7 @@ export default function NotFound() {
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">Page Not Found</h2>
           <p className="text-gray-700 text-lg">
-            Oops! The page you're looking for doesn't exist.
+            Oops! The page you&apos;re looking for doesn&apos;t exist.
           </p>
         </div>
 

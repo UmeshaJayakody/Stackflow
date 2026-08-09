@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getErrorMessage } from '@/lib/utils';
 
 // GET dashboard statistics
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Get total products count
     const totalProducts = await prisma.product.count();
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Calculate total inventory value
-    const totalInventoryValue = products.reduce((sum: number, product: { quantity: number; unitPrice: any }) => {
+    const totalInventoryValue = products.reduce((sum, product) => {
       return sum + product.quantity * Number(product.unitPrice);
     }, 0);
 
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Get total stock quantity
-    const totalStockQuantity = products.reduce((sum: number, product: { quantity: number; unitPrice: any }) => {
+    const totalStockQuantity = products.reduce((sum, product) => {
       return sum + product.quantity;
     }, 0);
 
@@ -129,10 +130,10 @@ export async function GET(request: NextRequest) {
         totalRevenue: totalRevenue.toFixed(2),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching dashboard stats:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch dashboard statistics', message: error.message },
+      { success: false, error: 'Failed to fetch dashboard statistics', message: getErrorMessage(error) },
       { status: 500 }
     );
   }

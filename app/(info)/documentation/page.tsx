@@ -1,22 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Book, FileText, Code, Settings, Home, Layers, Database, Play, Wrench, Zap, Shield, BarChart3, Users, Package, Star, CheckCircle, ChevronRight } from 'lucide-react';
-
-
-interface Section {
-  icon: any;
-  title: string;
-  href: string;
-  category: 'overview' | 'features' | 'technical' | 'setup' | 'usage' | 'development';
-  priority: number;
-}
+import type { LucideIcon } from 'lucide-react';
+import { Book, Code, Settings, Home, Layers, Database, Zap, Shield, BarChart3, Users, Package, Star, CheckCircle, ChevronRight } from 'lucide-react';
 
 interface DataCard {
   title: string;
   items: string[];
-  icon: any;
+  icon: LucideIcon;
   color: string;
   bgColor: string;
 }
@@ -28,15 +19,6 @@ interface TechStackItem {
   category: 'frontend' | 'backend' | 'devops';
 }
 
-interface QuickAccessCard {
-  title: string;
-  description: string;
-  icon: any;
-  href: string;
-  color: string;
-  bgColor: string;
-}
-
 interface InstallationStep {
   step: number;
   title: string;
@@ -44,14 +26,6 @@ interface InstallationStep {
   command?: string;
   code?: string;
   language?: string;
-}
-
-interface APIEndpoint {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  path: string;
-  description: string;
-  request?: string;
-  response?: string;
 }
 
 interface Prerequisite {
@@ -62,26 +36,6 @@ interface Prerequisite {
 }
 
 export default function DocumentationPage() {
-  const [readmeContent, setReadmeContent] = useState<string>('');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/documentation')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setReadmeContent(data.content);
-          console.log('README loaded, length:', data.content.length);
-          console.log('First 200 chars:', data.content.substring(0, 200));
-        }
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Error loading README:', err);
-        setLoading(false);
-      });
-  }, []);
-
   // Structured data for better organization
   const coreFeatures: DataCard = {
     title: 'Core Features',
@@ -200,89 +154,6 @@ export default function DocumentationPage() {
     }
   ];
 
-  // API Endpoints
-  const apiEndpoints: APIEndpoint[] = [
-    {
-      method: 'POST',
-      path: '/api/auth/login',
-      description: 'Authenticate a user',
-      request: `{
-  "email": "admin@example.com",
-  "password": "admin123"
-}`,
-      response: `{
-  "success": true,
-  "data": {
-    "userId": 1,
-    "email": "admin@example.com",
-    "name": "Admin User",
-    "role": "ADMIN"
-  }
-}`
-    },
-    {
-      method: 'GET',
-      path: '/api/products',
-      description: 'Retrieve all products with filtering',
-      response: `{
-  "success": true,
-  "data": [...]
-}`
-    },
-    {
-      method: 'POST',
-      path: '/api/products',
-      description: 'Create a new product',
-      request: `{
-  "name": "New Product",
-  "sku": "PROD-002",
-  "buyingPrice": 80.00,
-  "sellingPrice": 120.00,
-  "quantity": 30
-}`,
-      response: `{
-  "success": true,
-  "data": { "id": 2, ... }
-}`
-    },
-    {
-      method: 'GET',
-      path: '/api/purchases',
-      description: 'Retrieve all purchases',
-      response: `{
-  "success": true,
-  "data": [...]
-}`
-    },
-    {
-      method: 'POST',
-      path: '/api/purchases',
-      description: 'Record a new purchase',
-      request: `{
-  "productId": 1,
-  "supplierId": 1,
-  "quantity": 20,
-  "buyingPrice": 75.00
-}`,
-      response: `{
-  "success": true,
-  "data": { "id": 1, ... }
-}`
-    }
-  ];
-
-  const getCategoryColor = (category: Section['category']) => {
-    switch (category) {
-      case 'overview': return 'text-blue-600 bg-blue-50 border-blue-200';
-      case 'features': return 'text-purple-600 bg-purple-50 border-purple-200';
-      case 'technical': return 'text-gray-600 bg-gray-50 border-gray-200';
-      case 'setup': return 'text-orange-600 bg-orange-50 border-orange-200';
-      case 'usage': return 'text-green-600 bg-green-50 border-green-200';
-      case 'development': return 'text-indigo-600 bg-indigo-50 border-indigo-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 pt-16 sm:pt-20">
       {/* Header */}
@@ -310,7 +181,7 @@ export default function DocumentationPage() {
               <div className="space-y-8 mb-8">
                 {/* Features Overview */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {[coreFeatures, technicalFeatures, reportingFeatures].map((card, index) => (
+                  {[coreFeatures, technicalFeatures, reportingFeatures].map((card) => (
                     <div key={card.title} className={`border-2 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 ${card.bgColor}`}>
                       <div className="flex items-center gap-3 mb-4">
                         <div className={`p-2.5 rounded-xl bg-white shadow-md ${card.color}`}>
@@ -340,7 +211,7 @@ export default function DocumentationPage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {techStackItems.map((tech, index) => (
+                    {techStackItems.map((tech) => (
                       <div key={tech.name} className="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow duration-200">
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="font-semibold text-gray-900">{tech.name}</h4>
@@ -405,7 +276,7 @@ export default function DocumentationPage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {prerequisites.map((prereq, index) => (
+                    {prerequisites.map((prereq) => (
                       <div key={prereq.name} className="flex items-start gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl">
                         <div className={`w-3 h-3 rounded-full mt-2 flex-shrink-0 ${prereq.required ? 'bg-red-500' : 'bg-yellow-500'}`}></div>
                         <div className="flex-1">
@@ -432,7 +303,7 @@ export default function DocumentationPage() {
                   </div>
 
                   <div className="space-y-4">
-                    {installationSteps.map((step, index) => (
+                    {installationSteps.map((step) => (
                       <div key={step.step} className="flex gap-4 p-4 bg-gray-50 border border-gray-200 rounded-xl">
                         <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
                           {step.step}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { logActivity } from '@/lib/activityLogger';
+import { getErrorMessage } from '@/lib/utils';
 
 // GET all warehouses
 export async function GET() {
@@ -22,10 +23,10 @@ export async function GET() {
       success: true,
       data: warehouses
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching warehouses:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch warehouses', message: error.message },
+      { success: false, error: 'Failed to fetch warehouses', message: getErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -67,10 +68,10 @@ export async function POST(request: NextRequest) {
       success: true, 
       data: warehouse 
     }, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error creating warehouse:', error);
     return NextResponse.json(
-      { error: 'Failed to create warehouse', message: error.message },
+      { error: 'Failed to create warehouse', message: getErrorMessage(error) },
       { status: 500 }
     );
   }

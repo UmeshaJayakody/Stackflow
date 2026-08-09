@@ -197,7 +197,7 @@ export default function FAQPage() {
         {/* Contact Support */}
         <div className="mt-12 bg-white/70 backdrop-blur-sm border border-gray-200/50 rounded-xl p-8 text-center shadow-lg hover:shadow-xl transition-all duration-300">
           <h2 className="text-xl font-semibold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">Still have questions?</h2>
-          <p className="text-gray-600 mb-4">Can't find the answer you're looking for? Please reach out to our support team.</p>
+          <p className="text-gray-600 mb-4">Can&apos;t find the answer you&apos;re looking for? Please reach out to our support team.</p>
           <Link
             href="/support"
             className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-green-600 to-green-600 hover:from-green-700 hover:to-green-700 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 font-medium"

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { logActivity } from '@/lib/activityLogger';
+import { getErrorMessage } from '@/lib/utils';
 
 // PUT update warehouse
 export async function PUT(
@@ -44,10 +45,10 @@ export async function PUT(
       success: true, 
       data: warehouse 
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error updating warehouse:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to update warehouse', message: error.message },
+      { success: false, error: 'Failed to update warehouse', message: getErrorMessage(error) },
       { status: 500 }
     );
   }
@@ -106,10 +107,10 @@ export async function DELETE(
       success: true, 
       message: 'Warehouse deleted successfully' 
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error deleting warehouse:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to delete warehouse', message: error.message },
+      { success: false, error: 'Failed to delete warehouse', message: getErrorMessage(error) },
       { status: 500 }
     );
   }

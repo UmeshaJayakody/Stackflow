@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -15,18 +15,6 @@ interface Warehouse {
 interface Supplier {
   supplierId: number;
   supplierName: string;
-}
-
-interface Product {
-  productId: number;
-  productName: string;
-  sku: string;
-  unitPrice: number;
-  quantity: number;
-  minimumQuantity: number;
-  maximumQuantity: number;
-  warehouseId: number | null;
-  supplierId: number | null;
 }
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
@@ -55,27 +43,19 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     });
   }, [params]);
 
-  useEffect(() => {
-    if (productId) {
-      fetchProduct();
-      fetchWarehouses();
-      fetchSuppliers();
-    }
-  }, [productId]);
-
-  const fetchProduct = async () => {
+  const fetchProduct = useCallback(async () => {
     if (!productId) return;
-    
+
     try {
       const response = await fetch(`/api/products/${productId}`);
       const result = await response.json();
-      
+
       if (response.status === 404) {
         // Redirect to not found page
         notFound();
         return;
       }
-      
+
       if (result.success) {
         const product = result.data;
         setFormData({
@@ -99,9 +79,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     } finally {
       setFetching(false);
     }
-  };
+  }, [productId, router, toast]);
 
-  const fetchWarehouses = async () => {
+  const fetchWarehouses = useCallback(async () => {
     try {
       const response = await fetch('/api/warehouses');
       const result = await response.json();
@@ -111,9 +91,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     } catch (error) {
       console.error('Error fetching warehouses:', error);
     }
-  };
+  }, []);
 
-  const fetchSuppliers = async () => {
+  const fetchSuppliers = useCallback(async () => {
     try {
       const response = await fetch('/api/suppliers');
       const data = await response.json();
@@ -121,7 +101,15 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     } catch (error) {
       console.error('Error fetching suppliers:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (productId) {
+      fetchProduct();
+      fetchWarehouses();
+      fetchSuppliers();
+    }
+  }, [productId, fetchProduct, fetchWarehouses, fetchSuppliers]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

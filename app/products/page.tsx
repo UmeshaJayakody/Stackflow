@@ -1,11 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import LoadingDots from '../components/LoadingDots';
 import ProductDetailsModal from './components/ProductDetailsModal';
 import PurchaseModal from './components/PurchaseModal';
 import SaleModal from './components/SaleModal';
@@ -50,6 +47,11 @@ interface Supplier {
   supplierName: string;
 }
 
+interface Customer {
+  customerId: number;
+  customerName: string;
+}
+
 interface StockBatch {
   batchId: number;
   productId: number;
@@ -66,7 +68,6 @@ interface StockBatch {
 }
 
 export default function ProductsPage() {
-  const router = useRouter();
   const { user } = useAuth();
   const toast = useToast();
   const [products, setProducts] = useState<Product[]>([]);
@@ -82,7 +83,7 @@ export default function ProductsPage() {
   const [showDetailPopup, setShowDetailPopup] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showSaleModal, setShowSaleModal] = useState(false);
-  const [customers, setCustomers] = useState<any[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [stockBatches, setStockBatches] = useState<StockBatch[]>([]);
   const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
@@ -121,33 +122,7 @@ export default function ProductsPage() {
     return product.quantity <= threshold;
   };
 
-  // Handle productId from URL query parameter
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const productId = searchParams.get('productId');
-    
-    if (productId && products.length > 0) {
-      const product = products.find(p => p.productId === parseInt(productId));
-      if (product) {
-        openProductDetails(product);
-        // Clean up URL
-        window.history.replaceState({}, '', '/products');
-      }
-    }
-  }, [products]);
-
-  useEffect(() => {
-    fetchWarehouses();
-    fetchSuppliers();
-    fetchProducts();
-    fetchCustomers();
-  }, []);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [searchTerm, selectedWarehouse, selectedCategory, selectedSupplier]);
-
-  const fetchWarehouses = async () => {
+  const fetchWarehouses = useCallback(async () => {
     try {
       const response = await fetch('/api/warehouses');
       const result = await response.json();
@@ -157,9 +132,9 @@ export default function ProductsPage() {
     } catch (error) {
       console.error('Error fetching warehouses:', error);
     }
-  };
+  }, []);
 
-  const fetchSuppliers = async () => {
+  const fetchSuppliers = useCallback(async () => {
     try {
       const response = await fetch('/api/suppliers');
       const data = await response.json();
@@ -167,9 +142,9 @@ export default function ProductsPage() {
     } catch (error) {
       console.error('Error fetching suppliers:', error);
     }
-  };
+  }, []);
 
-  const fetchCustomers = async () => {
+  const fetchCustomers = useCallback(async () => {
     try {
       const response = await fetch('/api/customers');
       const data = await response.json();
@@ -177,9 +152,9 @@ export default function ProductsPage() {
     } catch (error) {
       console.error('Error fetching customers:', error);
     }
-  };
+  }, []);
 
-  const fetchStockBatches = async (productId: number) => {
+  const fetchStockBatches = useCallback(async (productId: number) => {
     try {
       const response = await fetch(`/api/stock-batches?productId=${productId}`);
       const data = await response.json();
@@ -188,9 +163,9 @@ export default function ProductsPage() {
       console.error('Error fetching stock batches:', error);
       setStockBatches([]);
     }
-  };
+  }, []);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -203,7 +178,7 @@ export default function ProductsPage() {
       const result = await response.json();
       if (result.success) {
         setProducts(result.data);
-        
+
         // Extract unique categories
         const uniqueCategories = [...new Set(result.data.map((p: Product) => p.category).filter(Boolean))] as string[];
         setCategories(uniqueCategories);
@@ -214,7 +189,7 @@ export default function ProductsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, selectedWarehouse, selectedCategory, selectedSupplier, toast]);
 
   const handleDelete = async (product: Product) => {
     setProductToDelete(product);
@@ -268,37 +243,6 @@ export default function ProductsPage() {
     }
   };
 
-  const handleQuickPurchase = async (product: Product) => {
-    if (suppliers.length === 0) {
-      toast.warning('Please add a supplier first');
-      return;
-    }
-
-    try {
-      const supplierId = product.supplier?.supplierId || suppliers[0].supplierId;
-      const response = await fetch('/api/purchases', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          supplierId,
-          productId: product.productId,
-          purchasedQuantity: 1,
-          purchasePrice: product.unitPrice,
-        }),
-      });
-
-      if (response.ok) {
-        toast.success('Purchase of 1 unit recorded successfully');
-        fetchProducts();
-      } else {
-        toast.error('Failed to record purchase');
-      }
-    } catch (error) {
-      console.error('Error recording purchase:', error);
-      toast.error('An error occurred while recording purchase');
-    }
-  };
-
   const handleEditProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -348,47 +292,37 @@ export default function ProductsPage() {
     }
   };
 
-  const handleQuickSale = async (product: Product) => {
-    if (customers.length === 0) {
-      toast.warning('Please add a customer first');
-      return;
-    }
-
-    if (product.quantity < 1) {
-      toast.warning('Insufficient stock');
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/sales', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customerId: customers[0].customerId,
-          productId: product.productId,
-          soldQuantity: 1,
-          salePrice: product.unitPrice,
-        }),
-      });
-
-      if (response.ok) {
-        toast.success('Sale of 1 unit recorded successfully');
-        fetchProducts();
-      } else {
-        toast.error('Failed to record sale');
-      }
-    } catch (error) {
-      console.error('Error recording sale:', error);
-      toast.error('An error occurred while recording sale');
-    }
-  };
-
-  const openProductDetails = (product: Product) => {
+  const openProductDetails = useCallback((product: Product) => {
     setSelectedProduct(product);
     setShowDetailPopup(true);
     // Fetch stock batches for this product
     fetchStockBatches(product.productId);
-  };
+  }, [fetchStockBatches]);
+
+  // Handle productId from URL query parameter
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const productId = searchParams.get('productId');
+
+    if (productId && products.length > 0) {
+      const product = products.find(p => p.productId === parseInt(productId));
+      if (product) {
+        openProductDetails(product);
+        // Clean up URL
+        window.history.replaceState({}, '', '/products');
+      }
+    }
+  }, [products, openProductDetails]);
+
+  useEffect(() => {
+    fetchWarehouses();
+    fetchSuppliers();
+    fetchCustomers();
+  }, [fetchWarehouses, fetchSuppliers, fetchCustomers]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const openPurchaseModal = () => {
     setShowDetailPopup(false);

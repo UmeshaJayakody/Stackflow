@@ -43,7 +43,7 @@ export default function DeleteUserModal({
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Are you sure?</h3>
             <p className="text-gray-600 mb-4">
-              You are about to delete <span className="font-semibold text-gray-900">"{user.fullName}"</span>.
+              You are about to delete <span className="font-semibold text-gray-900">&quot;{user.fullName}&quot;</span>.
             </p>
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
               <p className="text-sm text-yellow-800 mb-2">
