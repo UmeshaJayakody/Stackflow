@@ -363,7 +363,7 @@ export default function Login() {
                     <div className="w-full flex items-center justify-center px-6 py-4 bg-gray-900 text-white rounded-xl font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-gray-900/25 disabled:opacity-50 disabled:cursor-not-allowed group-hover:scale-[1.02]">
                       {loading ? (
                         <>
-                          <LoadingDots />
+                          <LoadingDots color="bg-white" />
                         </>
                       ) : (
                         <>

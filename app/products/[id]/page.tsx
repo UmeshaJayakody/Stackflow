@@ -371,7 +371,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                   disabled={loading}
                   className="flex-1 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium shadow-lg hover:shadow-xl transition-all duration-200"
                 >
-                  {loading ? <LoadingDots /> : 'Update Product'}
+                  {loading ? <LoadingDots color="bg-white" /> : 'Update Product'}
                 </button>
                 <Link
                   href="/products"
