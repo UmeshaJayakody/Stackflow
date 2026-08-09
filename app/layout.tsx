@@ -18,6 +18,24 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "StackFlow",
   description: "Manage your inventory efficiently",
+  openGraph: {
+    title: "StackFlow",
+    description: "Manage your inventory efficiently",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1080,
+        height: 1080,
+        alt: "StackFlow",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "StackFlow",
+    description: "Manage your inventory efficiently",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({

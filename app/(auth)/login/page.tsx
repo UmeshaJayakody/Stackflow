@@ -151,14 +151,83 @@ export function AnimatedGridPattern({
   );
 }
 
+interface DemoAccount {
+  role: string;
+  fullName: string;
+  email: string;
+  password: string;
+}
+
+const DEMO_ACCOUNTS: DemoAccount[] = [
+  { role: "Admin", fullName: "Admin User", email: "admin@example.com", password: "admin123" },
+  { role: "Staff", fullName: "Staff User", email: "staff@example.com", password: "staff123" },
+];
+
+function DemoAccountModal({
+  onSelect,
+  onClose,
+}: {
+  onSelect: (account: DemoAccount) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-black/10 p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="text-lg font-bold text-gray-900 mb-1">Try a demo account</h3>
+        <p className="text-sm text-gray-600 mb-5">
+          Pick a role to fill in the email and password, then click Sign In.
+        </p>
+        <div className="space-y-3">
+          {DEMO_ACCOUNTS.map((account) => (
+            <button
+              key={account.role}
+              type="button"
+              onClick={() => onSelect(account)}
+              className="w-full text-left p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-black/10 transition-colors"
+            >
+              <p className="font-medium text-gray-900">{account.role}</p>
+              <p className="text-sm text-gray-600">
+                {account.email} / {account.password}
+              </p>
+            </button>
+          ))}
+        </div>
+        <div className="mt-5 flex justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-sm font-medium text-gray-700 hover:text-gray-900"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showDemoModal, setShowDemoModal] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
+
+  const handleSelectDemoAccount = (account: DemoAccount) => {
+    setEmail(account.email);
+    setPassword(account.password);
+    setError("");
+    setShowDemoModal(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -332,10 +401,26 @@ export default function Login() {
                 <div className="absolute inset-0 bg-gradient-to-br from-black/5 via-transparent to-black/5 pointer-events-none" />
                 
                 {/* Logo */}
-                <div className="relative z-10 text-center mb-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Sign In</h2>
-                  <p className="text-gray-600">Welcome back! Please enter your details</p>
+                <div className="relative z-10 flex items-start justify-between mb-8">
+                  <div className="text-center flex-1">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Sign In</h2>
+                    <p className="text-gray-600">Welcome back! Please enter your details</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowDemoModal(true)}
+                    className="shrink-0 px-3 py-1.5 text-sm font-medium text-gray-700 bg-black/5 hover:bg-black/10 border border-black/10 rounded-lg transition-colors"
+                  >
+                    Test
+                  </button>
                 </div>
+
+                {showDemoModal && (
+                  <DemoAccountModal
+                    onSelect={handleSelectDemoAccount}
+                    onClose={() => setShowDemoModal(false)}
+                  />
+                )}
 
                 <form onSubmit={handleSubmit} className="relative z-10 space-y-6">
                   <div>
