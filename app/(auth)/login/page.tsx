@@ -16,8 +16,18 @@ interface DemoAccount {
 }
 
 const DEMO_ACCOUNTS: DemoAccount[] = [
-  { role: "Admin", fullName: "Admin User", email: "admin@example.com", password: "admin123" },
-  { role: "Staff", fullName: "Staff User", email: "staff@example.com", password: "staff123" },
+  {
+    role: "Admin",
+    fullName: "Admin User",
+    email: "admin@example.com",
+    password: process.env.NEXT_PUBLIC_DEMO_ADMIN_PASSWORD || "admin123",
+  },
+  {
+    role: "Staff",
+    fullName: "Staff User",
+    email: "staff@example.com",
+    password: process.env.NEXT_PUBLIC_DEMO_STAFF_PASSWORD || "staff123",
+  },
 ];
 
 function DemoAccountModal({

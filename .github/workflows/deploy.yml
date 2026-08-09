@@ -76,11 +76,13 @@ jobs:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GHCR_ACTOR: ${{ github.actor }}
+          SEED_ADMIN_PASSWORD: "Password123!"
+          SEED_STAFF_PASSWORD: "Password123!"
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          envs: IMAGE_TAG,POSTGRES_PASSWORD,SESSION_SECRET,EMAIL_USER,EMAIL_PASSWORD,EMAIL_FROM,GHCR_TOKEN,GHCR_ACTOR
+          envs: IMAGE_TAG,POSTGRES_PASSWORD,SESSION_SECRET,EMAIL_USER,EMAIL_PASSWORD,EMAIL_FROM,GHCR_TOKEN,GHCR_ACTOR,SEED_ADMIN_PASSWORD,SEED_STAFF_PASSWORD
           script: |
             set -e
             mkdir -p /opt/stackflow
@@ -95,6 +97,8 @@ jobs:
             EMAIL_USER=${EMAIL_USER}
             EMAIL_PASSWORD=${EMAIL_PASSWORD}
             EMAIL_FROM=${EMAIL_FROM}
+            SEED_ADMIN_PASSWORD=${SEED_ADMIN_PASSWORD}
+            SEED_STAFF_PASSWORD=${SEED_STAFF_PASSWORD}
             ENV
             echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_ACTOR}" --password-stdin
             docker compose pull

@@ -4,10 +4,13 @@ import bcrypt from 'bcrypt';
 async function main() {
   console.log('Starting database seeding...');
 
-  const adminPasswordHash = await bcrypt.hash('admin123', 10);
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'admin123';
+  const staffPassword = process.env.SEED_STAFF_PASSWORD || 'staff123';
+
+  const adminPasswordHash = await bcrypt.hash(adminPassword, 10);
   await prisma.user.upsert({
     where: { email: 'admin@example.com' },
-    update: {},
+    update: { passwordHash: adminPasswordHash },
     create: {
       fullName: 'Admin User',
       email: 'admin@example.com',
@@ -15,12 +18,12 @@ async function main() {
       role: 'admin',
     },
   });
-  console.log('✓ Created admin user');
+  console.log('✓ Synced admin user');
 
-  const staffPasswordHash = await bcrypt.hash('staff123', 10);
+  const staffPasswordHash = await bcrypt.hash(staffPassword, 10);
   await prisma.user.upsert({
     where: { email: 'staff@example.com' },
-    update: {},
+    update: { passwordHash: staffPasswordHash },
     create: {
       fullName: 'Staff User',
       email: 'staff@example.com',
@@ -28,13 +31,9 @@ async function main() {
       role: 'staff',
     },
   });
-  console.log('✓ Created staff user');
+  console.log('✓ Synced staff user');
 
   console.log('✅ Database seeding completed successfully!');
-  console.log('');
-  console.log('Login credentials:');
-  console.log('  Admin — Email: admin@example.com  Password: admin123');
-  console.log('  Staff — Email: staff@example.com  Password: staff123');
 }
 
 main()
