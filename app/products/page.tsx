@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import LoadingDots from '../components/LoadingDots';
 import ProductDetailsModal from './components/ProductDetailsModal';
 import PurchaseModal from './components/PurchaseModal';
@@ -67,6 +68,7 @@ interface StockBatch {
 export default function ProductsPage() {
   const router = useRouter();
   const { user } = useAuth();
+  const toast = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -208,6 +210,7 @@ export default function ProductsPage() {
       }
     } catch (error) {
       console.error('Error fetching products:', error);
+      toast.error('Failed to load products');
     } finally {
       setLoading(false);
     }
@@ -250,16 +253,16 @@ export default function ProductsPage() {
       const result = await response.json();
       
       if (result.success) {
-        alert('Product deleted successfully with sale record created');
+        toast.success('Product deleted successfully with sale record created');
         fetchProducts();
         setShowDeleteModal(false);
         setProductToDelete(null);
       } else {
-        alert('Failed to delete product: ' + result.error);
+        toast.error('Failed to delete product: ' + result.error);
       }
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('An error occurred while deleting the product');
+      toast.error('An error occurred while deleting the product');
     } finally {
       setIsLoading(false);
     }
@@ -267,7 +270,7 @@ export default function ProductsPage() {
 
   const handleQuickPurchase = async (product: Product) => {
     if (suppliers.length === 0) {
-      alert('Please add a supplier first');
+      toast.warning('Please add a supplier first');
       return;
     }
 
@@ -283,16 +286,16 @@ export default function ProductsPage() {
           purchasePrice: product.unitPrice,
         }),
       });
-      
+
       if (response.ok) {
-        alert('Purchase of 1 unit recorded successfully');
+        toast.success('Purchase of 1 unit recorded successfully');
         fetchProducts();
       } else {
-        alert('Failed to record purchase');
+        toast.error('Failed to record purchase');
       }
     } catch (error) {
       console.error('Error recording purchase:', error);
-      alert('An error occurred while recording purchase');
+      toast.error('An error occurred while recording purchase');
     }
   };
 
@@ -318,7 +321,7 @@ export default function ProductsPage() {
       });
 
       if (response.ok) {
-        alert('Product updated successfully');
+        toast.success('Product updated successfully');
         setShowEditProductModal(false);
         setEditProductForm({
           productId: 0,
@@ -335,11 +338,11 @@ export default function ProductsPage() {
         fetchProducts();
       } else {
         const data = await response.json();
-        alert(data.error || 'Failed to update product');
+        toast.error(data.error || 'Failed to update product');
       }
     } catch (error) {
       console.error('Error updating product:', error);
-      alert('An error occurred while updating product');
+      toast.error('An error occurred while updating product');
     } finally {
       setIsLoading(false);
     }
@@ -347,12 +350,12 @@ export default function ProductsPage() {
 
   const handleQuickSale = async (product: Product) => {
     if (customers.length === 0) {
-      alert('Please add a customer first');
+      toast.warning('Please add a customer first');
       return;
     }
 
     if (product.quantity < 1) {
-      alert('Insufficient stock');
+      toast.warning('Insufficient stock');
       return;
     }
 
@@ -367,16 +370,16 @@ export default function ProductsPage() {
           salePrice: product.unitPrice,
         }),
       });
-      
+
       if (response.ok) {
-        alert('Sale of 1 unit recorded successfully');
+        toast.success('Sale of 1 unit recorded successfully');
         fetchProducts();
       } else {
-        alert('Failed to record sale');
+        toast.error('Failed to record sale');
       }
     } catch (error) {
       console.error('Error recording sale:', error);
-      alert('An error occurred while recording sale');
+      toast.error('An error occurred while recording sale');
     }
   };
 
@@ -438,11 +441,11 @@ export default function ProductsPage() {
           }
         }, 100);
       } else {
-        alert('Failed to add supplier');
+        toast.error('Failed to add supplier');
       }
     } catch (error) {
       console.error('Error adding supplier:', error);
-      alert('An error occurred');
+      toast.error('An error occurred');
     }
   };
 
@@ -488,11 +491,11 @@ export default function ProductsPage() {
           }
         }, 100);
       } else {
-        alert('Failed to add customer');
+        toast.error('Failed to add customer');
       }
     } catch (error) {
       console.error('Error adding customer:', error);
-      alert('An error occurred');
+      toast.error('An error occurred');
     }
   };
 
@@ -517,7 +520,7 @@ export default function ProductsPage() {
       });
       
       if (response.ok) {
-        alert('Product added successfully!');
+        toast.success('Product added successfully!');
         setShowAddProductModal(false);
         setNewProductForm({
           productName: '',
@@ -532,11 +535,11 @@ export default function ProductsPage() {
         fetchProducts();
       } else {
         const result = await response.json();
-        alert('Failed to add product: ' + (result.error || 'Unknown error'));
+        toast.error('Failed to add product: ' + (result.error || 'Unknown error'));
       }
     } catch (error) {
       console.error('Error adding product:', error);
-      alert('An error occurred while adding the product');
+      toast.error('An error occurred while adding the product');
     }
   };
 
@@ -557,16 +560,16 @@ export default function ProductsPage() {
       });
       
       if (response.ok) {
-        alert('Purchase recorded successfully');
+        toast.success('Purchase recorded successfully');
         setShowPurchaseModal(false);
         setSelectedProduct(null);
         fetchProducts();
       } else {
-        alert('Failed to record purchase');
+        toast.error('Failed to record purchase');
       }
     } catch (error) {
       console.error('Error recording purchase:', error);
-      alert('An error occurred');
+      toast.error('An error occurred');
     }
   };
 
@@ -587,17 +590,17 @@ export default function ProductsPage() {
       });
       
       if (response.ok) {
-        alert('Sale recorded successfully');
+        toast.success('Sale recorded successfully');
         setShowSaleModal(false);
         setSelectedProduct(null);
         fetchProducts();
       } else {
         const result = await response.json();
-        alert('Failed to record sale: ' + (result.error || 'Unknown error'));
+        toast.error('Failed to record sale: ' + (result.error || 'Unknown error'));
       }
     } catch (error) {
       console.error('Error recording sale:', error);
-      alert('An error occurred');
+      toast.error('An error occurred');
     }
   };
 

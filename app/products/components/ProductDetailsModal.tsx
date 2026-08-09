@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from 'react';
 import QRCode from 'qrcode';
+import { useToast } from '../../context/ToastContext';
 
 interface Product {
   productId: number;
@@ -64,6 +65,7 @@ export default function ProductDetailsModal({
   isLowStock
 }: ProductDetailsModalProps) {
   const qrCodeRef = useRef<HTMLCanvasElement>(null);
+  const toast = useToast();
 
   useEffect(() => {
     if (product && qrCodeRef.current) {
@@ -101,11 +103,11 @@ export default function ProductDetailsModal({
           });
         } else {
           downloadQRCode();
-          alert('Sharing not supported. QR code has been downloaded instead.');
+          toast.info('Sharing not supported. QR code has been downloaded instead.');
         }
       } catch (error) {
         console.error('Error sharing QR code:', error);
-        alert('Failed to share QR code');
+        toast.error('Failed to share QR code');
       }
     }
   };

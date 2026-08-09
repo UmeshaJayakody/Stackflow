@@ -4,8 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Mail, Phone, MapPin, Send, Home, MessageSquare } from 'lucide-react';
 import LoadingDots from '../../components/LoadingDots';
+import { useToast } from '../../context/ToastContext';
 
 export default function SupportPage() {
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -31,12 +33,13 @@ export default function SupportPage() {
       if (result.success) {
         setSubmitted(true);
         setFormData({ name: '', email: '', subject: '', message: '' });
+        toast.success('Message sent successfully');
       } else {
-        alert('Failed to send message: ' + result.error);
+        toast.error('Failed to send message: ' + result.error);
       }
     } catch (error) {
       console.error('Error sending support message:', error);
-      alert('An error occurred while sending your message');
+      toast.error('An error occurred while sending your message');
     } finally {
       setLoading(false);
     }

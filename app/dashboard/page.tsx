@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useToast } from '../context/ToastContext';
 
 interface DashboardStats {
   totalProducts: number;
@@ -19,6 +20,7 @@ interface DashboardStats {
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const toast = useToast();
 
   useEffect(() => {
     fetchDashboardStats();
@@ -30,9 +32,12 @@ export default function DashboardPage() {
       const result = await response.json();
       if (result.success) {
         setStats(result.data);
+      } else {
+        toast.error(result.error || 'Failed to load dashboard stats');
       }
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
+      toast.error('Failed to load dashboard stats');
     } finally {
       setLoading(false);
     }

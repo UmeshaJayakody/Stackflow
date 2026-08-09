@@ -1,5 +1,7 @@
 'use client';
 
+import { useToast } from '../../../context/ToastContext';
+
 interface ResetPasswordModalProps {
   isOpen: boolean;
   user: {
@@ -19,6 +21,8 @@ export default function ResetPasswordModal({
   onConfirm,
   isLoading = false
 }: ResetPasswordModalProps) {
+  const toast = useToast();
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -26,12 +30,12 @@ export default function ResetPasswordModal({
     const confirmPassword = formData.get('confirmPassword') as string;
 
     if (newPassword !== confirmPassword) {
-      alert('Passwords do not match');
+      toast.error('Passwords do not match');
       return;
     }
 
     if (newPassword.length < 6) {
-      alert('Password must be at least 6 characters');
+      toast.error('Password must be at least 6 characters');
       return;
     }
 
@@ -61,7 +65,7 @@ export default function ResetPasswordModal({
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Reset Password</h3>
             <p className="text-gray-600 mb-4">
-              Enter a new password for <span className="font-semibold text-gray-900">"{user.fullName}"</span>.
+              Enter a new password for <span className="font-semibold text-gray-900">&quot;{user.fullName}&quot;</span>.
             </p>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
               <p className="text-sm text-blue-800">

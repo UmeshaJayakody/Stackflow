@@ -31,7 +31,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Load user from localStorage on mount
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {
+        localStorage.removeItem("user");
+      }
     }
     setLoading(false);
   }, []);

@@ -6,6 +6,7 @@ import FeaturedCrmDemoSection from './components/ui/featured-crm-demo-section';
 import ProductStockTrend from './components/ui/product-stock-trend';
 import DailyProfitLossBar from './components/ui/daily-profit-loss-bar';
 import LoadingDots from './components/LoadingDots';
+import { useToast } from './context/ToastContext';
 
 interface DashboardStats {
   totalProducts: number;
@@ -23,6 +24,7 @@ interface DashboardStats {
 export default function Home() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const toast = useToast();
 
   useEffect(() => {
     fetchDashboardStats();
@@ -34,9 +36,12 @@ export default function Home() {
       const result = await response.json();
       if (result.success) {
         setStats(result.data);
+      } else {
+        toast.error(result.error || 'Failed to load dashboard stats');
       }
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
+      toast.error('Failed to load dashboard stats');
     } finally {
       setLoading(false);
     }

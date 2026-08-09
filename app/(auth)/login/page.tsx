@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import { cn } from "@/lib/utils";
 import LoadingDots from "../../components/LoadingDots";
 
@@ -221,6 +222,7 @@ export default function Login() {
   const [showDemoModal, setShowDemoModal] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
+  const toast = useToast();
 
   const handleSelectDemoAccount = (account: DemoAccount) => {
     setEmail(account.email);
@@ -246,12 +248,15 @@ export default function Login() {
       if (response.ok) {
         // Use AuthContext login function
         login(data.user);
+        toast.success(`Welcome back, ${data.user.fullName}`);
         router.push("/");
       } else {
         setError(data.error || "Login failed");
+        toast.error(data.error || "Login failed");
       }
     } catch (err) {
       setError("An error occurred. Please try again.");
+      toast.error("An error occurred. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, DollarSign, Wallet } from 'lucide-react';
 import LoadingDots from '../LoadingDots';
+import { useToast } from '../../context/ToastContext';
 
 interface DailyProfit {
   date: string;
@@ -21,6 +22,7 @@ export default function DailyProfitLossBar() {
   const [data, setData] = useState<ProfitLossStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
+  const toast = useToast();
 
   useEffect(() => {
     fetchProfitData();
@@ -34,9 +36,12 @@ export default function DailyProfitLossBar() {
       const result = await response.json();
       if (result.success) {
         setData(result.data);
+      } else {
+        toast.error(result.error || 'Failed to load profit/loss data');
       }
     } catch (error) {
       console.error('Error fetching profit data:', error);
+      toast.error('Failed to load profit/loss data');
     } finally {
       setLoading(false);
     }

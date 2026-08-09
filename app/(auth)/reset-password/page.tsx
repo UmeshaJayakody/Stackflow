@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import toast, { Toaster } from 'react-hot-toast';
+import { useToast } from '../../context/ToastContext';
 import { cn } from '@/lib/utils';
 import LoadingDots from '../../components/LoadingDots';
 
@@ -159,8 +159,8 @@ function ResetPasswordForm() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const toast = useToast();
 
   useEffect(() => {
     if (!token) {
@@ -172,7 +172,6 @@ function ResetPasswordForm() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    setMessage('');
 
     // Validation
     if (newPassword.length < 6) {
@@ -206,10 +205,12 @@ function ResetPasswordForm() {
         }, 2000);
       } else {
         setError(data.error || 'Failed to reset password');
+        toast.error(data.error || 'Failed to reset password');
       }
     } catch (error) {
       console.error('Error:', error);
       setError('An error occurred. Please try again.');
+      toast.error('An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -388,7 +389,6 @@ function ResetPasswordForm() {
           </div>
         </div>
       </div>
-      <Toaster />
     </div>
   );
 }

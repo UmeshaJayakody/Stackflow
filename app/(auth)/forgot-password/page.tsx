@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import toast, { Toaster } from 'react-hot-toast';
+import { useToast } from '../../context/ToastContext';
 import { cn } from '@/lib/utils';
 import LoadingDots from '../../components/LoadingDots';
 
@@ -155,14 +155,13 @@ export default function ForgotPasswordPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const toast = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    setMessage('');
 
     try {
       const response = await fetch('/api/auth/forgot-password', {
@@ -180,10 +179,12 @@ export default function ForgotPasswordPage() {
         }, 2000);
       } else {
         setError(data.error || 'Failed to send reset email');
+        toast.error(data.error || 'Failed to send reset email');
       }
     } catch (error) {
       console.error('Error:', error);
       setError('An error occurred. Please try again.');
+      toast.error('An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -344,7 +345,6 @@ export default function ForgotPasswordPage() {
           </div>
         </div>
       </div>
-      <Toaster />
     </div>
   );
 }

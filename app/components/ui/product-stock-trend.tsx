@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, ChevronDown } from 'lucide-react';
 import LoadingDots from '../LoadingDots';
+import { useToast } from '../../context/ToastContext';
 
 interface Product {
   productId: number;
@@ -24,6 +25,7 @@ export default function ProductStockTrend() {
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
+  const toast = useToast();
 
   useEffect(() => {
     fetchProducts();
@@ -59,6 +61,7 @@ export default function ProductStockTrend() {
       }
     } catch (error) {
       console.error('Error fetching stock trend:', error);
+      toast.error('Failed to load stock trend data');
     } finally {
       setLoading(false);
     }
