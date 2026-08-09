@@ -9,6 +9,8 @@ RUN --mount=type=cache,target=/root/.npm npm ci
 
 FROM base AS builder
 WORKDIR /app
+ARG NEXT_PUBLIC_ENABLE_DEMO_LOGIN=true
+ENV NEXT_PUBLIC_ENABLE_DEMO_LOGIN=$NEXT_PUBLIC_ENABLE_DEMO_LOGIN
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate
