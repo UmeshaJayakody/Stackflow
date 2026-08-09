@@ -76,6 +76,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showDemoModal, setShowDemoModal] = useState(false);
+  const demoLoginEnabled = process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === "true";
   const router = useRouter();
   const { login } = useAuth();
   const toast = useToast();
@@ -267,16 +268,18 @@ export default function Login() {
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">Sign In</h2>
                     <p className="text-gray-600">Welcome back! Please enter your details</p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowDemoModal(true)}
-                    className="shrink-0 px-3 py-1.5 text-sm font-medium text-gray-700 bg-black/5 hover:bg-black/10 border border-black/10 rounded-lg transition-colors"
-                  >
-                    Test
-                  </button>
+                  {demoLoginEnabled && (
+                    <button
+                      type="button"
+                      onClick={() => setShowDemoModal(true)}
+                      className="shrink-0 px-3 py-1.5 text-sm font-medium text-gray-700 bg-black/5 hover:bg-black/10 border border-black/10 rounded-lg transition-colors"
+                    >
+                      Test
+                    </button>
+                  )}
                 </div>
 
-                {showDemoModal && (
+                {demoLoginEnabled && showDemoModal && (
                   <DemoAccountModal
                     onSelect={handleSelectDemoAccount}
                     onClose={() => setShowDemoModal(false)}
